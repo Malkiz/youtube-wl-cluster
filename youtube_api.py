@@ -1,13 +1,14 @@
-import json
+from google_auth_oauthlib.flow import InstalledAppFlow
+from googleapiclient.discovery import build
 
-with open('client_secret.json') as json_file:
-    data = json.load(json_file)['installed']
-    client_id = data['client_id']
-    client_secret = data['client_secret']
-    project_id = data['project_id']
+flow = InstalledAppFlow.from_client_secrets_file(
+    'client_secret.json',
+    scopes=['profile', 'email'])
 
-print(client_id)
-print(client_secret)
-print(project_id)
+flow.run_local_server()
+credentials = flow.credentials
 
-
+youtube = build('youtube', 'v3', credentials=credentials)
+request = youtube.channels().list(part='statistics', forUsername='sentdex')
+response = request.execute()
+print(response)
