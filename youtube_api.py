@@ -2,6 +2,7 @@ import json
 from googleapiclient.discovery import build
 import pandas as pd
 from os import path
+from itertools import chain
 
 def chunk_df(df, n=10):
     return [df[i:i+n] for i in range(0,df.shape[0],n)]
@@ -40,17 +41,21 @@ def youtube():
         _youtube = build('youtube', 'v3', developerKey=api_key)
     return _youtube
 
+def join_concat(list_of_lists):
+    return list(chain.from_iterable(list_of_lists))
+
 def get_videos_data(wl_chunks):
-    return [youtube().videos().list(
+    return join_concat([youtube().videos().list(
         part="snippet,contentDetails,statistics",
         id=','.join(wl_chunks[i]['id'])
-    ).execute() for i in range(0, len(wl_chunks))]
+    ).execute()['items'] for i in range(0, len(wl_chunks))])
 
 def main():
     wl = pd.read_csv('WL.csv')
     wl_chunks = chunk_df(wl, 50)
     data = cache_json("videos_data.json", lambda: get_videos_data(wl_chunks))
-    print(data)
+    print(data[0])
+    print(len(data))
 
 if __name__ == "__main__":
     main()
