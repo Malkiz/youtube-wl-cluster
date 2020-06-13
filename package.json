@@ -17,6 +17,7 @@
   },
   "homepage": "https://github.com/Malkiz/youtube-wl-cluster#readme",
   "dependencies": {
-    "puppeteer": "^3.3.0"
+    "puppeteer": "^3.3.0",
+    "rmfr": "^2.0.0"
   }
 }
