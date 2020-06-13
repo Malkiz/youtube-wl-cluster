@@ -1,6 +1,10 @@
-const puppeteer = require('puppeteer');
+const puppeteer = require('puppeteer-extra');
 const rimraf = require('rmfr');
 const account = require('./account');
+
+// add stealth plugin and use defaults (all evasion techniques)
+const StealthPlugin = require('puppeteer-extra-plugin-stealth');
+puppeteer.use(StealthPlugin());
 
 // https://github.com/puppeteer/puppeteer/issues/1837#issuecomment-522850970
 const PATHS = {

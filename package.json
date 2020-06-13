@@ -18,6 +18,8 @@
   "homepage": "https://github.com/Malkiz/youtube-wl-cluster#readme",
   "dependencies": {
     "puppeteer": "^3.3.0",
+    "puppeteer-extra": "^3.1.9",
+    "puppeteer-extra-plugin-stealth": "^2.4.9",
     "rmfr": "^2.0.0"
   }
 }
