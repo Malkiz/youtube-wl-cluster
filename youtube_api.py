@@ -50,12 +50,29 @@ def get_videos_data(wl_chunks):
         id=','.join(wl_chunks[i]['id'])
     ).execute()['items'] for i in range(0, len(wl_chunks))])
 
+def get_channels_data(videos_list):
+    channel_ids = set(map(lambda item: item['snippet']['channelId'], videos_list))
+    channel_chunks = chunk_df(pd.DataFrame(list(channel_ids)), 50)
+    return join_concat([youtube().channels().list(
+        part="snippet,contentDetails,statistics",
+        id=','.join(channel_chunks[i][0])
+    ).execute()['items'] for i in range(0, len(channel_chunks))])
+
 def main():
     wl = pd.read_csv('WL.csv')
     wl_chunks = chunk_df(wl, 50)
-    data = cache_json("videos_data.json", lambda: get_videos_data(wl_chunks))
-    print(data[0])
-    print(len(data))
+    videos_list = cache_json("videos_data.json", lambda: get_videos_data(wl_chunks))
+    channels_list = cache_json("channels_data.json", lambda: get_channels_data(videos_list))
+
+    print(channels_list[0])
+    print(len(channels_list))
+    
+    #print(data[0])
+    #print(len(data))
+    #print(data[0].keys())
+    #for k in ['snippet', 'contentDetails', 'statistics']:
+    #    print(data[0][k])
+    #    print(data[0][k].keys())
 
 if __name__ == "__main__":
     main()
