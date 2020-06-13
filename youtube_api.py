@@ -64,7 +64,7 @@ def main():
     videos_list = cache_json("videos_data.json", lambda: get_videos_data(wl_chunks))
     channels_list = cache_json("channels_data.json", lambda: get_channels_data(videos_list))
 
-    videos_df = pd.DataFrame(videos_list, columns=['etag', 'id'])
+    videos_df = pd.DataFrame(videos_list, columns=['id'])
     videos_snippet = pd.DataFrame([v['snippet'] for v in videos_list], columns=['channelId','title','description','channelTitle','tags','categoryId'])
     videos_contentDetails = pd.DataFrame([v['contentDetails'] for v in videos_list], columns=['duration'])
     videos_statistics = pd.DataFrame([v['statistics'] for v in videos_list])
@@ -72,19 +72,17 @@ def main():
 
     videos_df = pd.concat([videos_df, videos_snippet, videos_contentDetails, videos_statistics, videos_topicDetails], axis=1)
 
-    #print(videos_list[0].keys())
-    #print(videos_list[0]['topicDetails'])
-    print(videos_df)
+    channels_df = pd.DataFrame(channels_list, columns=['id'])
+    channels_snippet = pd.DataFrame([v['snippet'] for v in channels_list], columns=['title', 'description'])
+    channels_statistics = pd.DataFrame([v['statistics'] for v in channels_list])
+    channels_topicDetails = pd.DataFrame([v['topicDetails'] if 'topicDetails' in v else {} for v in channels_list])
 
-    #print(channels_list[0])
-    #print(len(channels_list))
-    
-    #print(data[0])
-    #print(len(data))
-    #print(data[0].keys())
-    #for k in ['snippet', 'contentDetails', 'statistics']:
-    #    print(data[0][k])
-    #    print(data[0][k].keys())
+    channels_df = pd.concat([channels_df, channels_snippet, channels_statistics, channels_topicDetails], axis=1)
+
+    videos_df = videos_df.join(channels_df.set_index('id'), on='channelId', rsuffix='_channel')
+
+    print(videos_df)
+    print(videos_df.loc[0])
 
 if __name__ == "__main__":
     main()
