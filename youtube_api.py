@@ -11,6 +11,22 @@ def get_api_key():
         api_key = data['key']
     return api_key
 
+def get_videos_data(youtube, wl_chunks, read=True, write=True, filename="videos_data.json"):
+    if not read:
+        data = [youtube.videos().list(
+            part="snippet,contentDetails,statistics",
+            id=','.join(wl_chunks[i]['id'])
+        ).execute() for i in range(0, len(wl_chunks))]
+    else:
+        with open(filename) as f:
+            data = json.load(f)
+
+    if write:
+        with open(filename, 'w') as f:
+            json.dump(data, f)
+
+    return data
+
 wl = pd.read_csv('WL.csv')
 wl_chunks = chunk_df(wl, 50)
 
@@ -18,10 +34,7 @@ wl_chunks = chunk_df(wl, 50)
 
 api_key = get_api_key()
 youtube = build('youtube', 'v3', developerKey=api_key)
-data = [youtube.videos().list(
-    part="snippet,contentDetails,statistics",
-    id=','.join(wl_chunks[i]['id'])
-).execute() for i in range(0, len(wl_chunks))]
+data = get_videos_data(youtube, wl_chunks)
 
 print(data)
 
