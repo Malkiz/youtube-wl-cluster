@@ -46,7 +46,7 @@ def join_concat(list_of_lists):
 
 def get_videos_data(wl_chunks):
     return join_concat([youtube().videos().list(
-        part="snippet,contentDetails,statistics",
+        part="snippet,contentDetails,statistics,topicDetails",
         id=','.join(wl_chunks[i]['id'])
     ).execute()['items'] for i in range(0, len(wl_chunks))])
 
@@ -54,7 +54,7 @@ def get_channels_data(videos_list):
     channel_ids = set(map(lambda item: item['snippet']['channelId'], videos_list))
     channel_chunks = chunk_df(pd.DataFrame(list(channel_ids)), 50)
     return join_concat([youtube().channels().list(
-        part="snippet,contentDetails,statistics",
+        part="snippet,contentDetails,statistics,topicDetails",
         id=','.join(channel_chunks[i][0])
     ).execute()['items'] for i in range(0, len(channel_chunks))])
 
