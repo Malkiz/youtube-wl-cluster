@@ -3,6 +3,7 @@ from googleapiclient.discovery import build
 import pandas as pd
 from os import path
 from itertools import chain
+from sklearn.cluster import KMeans
 
 def chunk_df(df, n=10):
     return [df[i:i+n] for i in range(0,df.shape[0],n)]
@@ -95,14 +96,28 @@ def get_features_df(videos_df):
     array_columns = ['tags','relevantTopicIds','topicCategories','topicIds','topicCategories_channel']
     category_columns = ['channelId','channelTitle','categoryId']
 
-    return pd.DataFrame(videos_df, columns=numeric_columns)
+    return pd.DataFrame(videos_df, columns=numeric_columns).fillna(0)
+
+def clustering(df):
+    # K-means
+    res = KMeans(n_clusters=3).fit_predict(df)
+
+    # PCA + K-means
+    # what else?
+
+    return res
 
 def main():
     videos_df = get_videos_df()
     features_df = get_features_df(videos_df)
+    clusters = clustering(features_df)
 
     print(features_df)
     print(features_df.iloc[0])
+
+    #print(features_df.loc[features_df.isnull().any(axis=1)])
+
+    print(clusters)
 
 if __name__ == "__main__":
     main()
