@@ -5,6 +5,8 @@ from os import path
 from itertools import chain
 from sklearn.cluster import KMeans
 from sklearn import metrics
+import matplotlib
+matplotlib.use('TkAgg')
 import matplotlib.pyplot as plt
 
 def chunk_df(df, n=10):
@@ -105,6 +107,7 @@ def clustering(df, n=3):
     model = KMeans(n_clusters=n).fit(df)
     labels = model.labels_
     scores = {
+        "inertia": model.inertia_,
         "silhouette_score": metrics.silhouette_score(df, labels, metric='euclidean'),
         "calinski_harabasz_score": metrics.calinski_harabasz_score(df, labels),
         "davies_bouldin_score": metrics.davies_bouldin_score(df, labels)
@@ -125,18 +128,14 @@ def main():
     #print(features_df.loc[features_df.isnull().any(axis=1)])
 
     all_scores = pd.DataFrame([])
-    for n in range(3,20):
+    for n in range(3,10):
         model, labels, scores = clustering(features_df,n)
-        #print(n)
-        #print(model)
-        #print(labels)
         all_scores = all_scores.append(pd.Series(scores, name=n))
 
-    print(all_scores)
+    #print(all_scores)
 
     ax = plt.gca()
-    for c in all_scores.columns:
-        all_scores.reset_index().plot(kind='line',x='index',y=c,ax=ax)
+    all_scores.plot(subplots=True,ax=ax,kind='line')
     plt.show()
 
 if __name__ == "__main__":
