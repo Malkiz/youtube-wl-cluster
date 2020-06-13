@@ -4,9 +4,9 @@
 3. Scroll all the way to the bottom of the page. Do this until the entire list is loaded to the page.
 4. Open the browser console (F12) and run this script:
 ```javascript
-["id", ...document.querySelectorAll('ytd-playlist-video-renderer.style-scope > div:nth-child(2) > a:nth-child(1)')].map(e => e.href.match(/v=([^&]*)/)[1]).join('\n')
+["id", ...([...document.querySelectorAll('ytd-playlist-video-renderer.style-scope > div:nth-child(2) > a:nth-child(1)')].map(e => e.href.match(/v=([^&]*)/)[1]))].join('\n')
 ```
-5. Copy the output to a text file and save it. The file should look like this:
+5. Copy the output to a text file and save it as `WL.csv`. The file should look like this:
 ```
 id
 W6nsrjAxO3Y
