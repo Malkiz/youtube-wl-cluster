@@ -58,7 +58,7 @@ def get_channels_data(videos_list):
         id=','.join(channel_chunks[i][0])
     ).execute()['items'] for i in range(0, len(channel_chunks))])
 
-def main():
+def get_videos_df():
     wl = pd.read_csv('WL.csv')
     wl_chunks = chunk_df(wl, 50)
     videos_list = cache_json("videos_data.json", lambda: get_videos_data(wl_chunks))
@@ -80,6 +80,10 @@ def main():
     channels_df = pd.concat([channels_df, channels_snippet, channels_statistics, channels_topicDetails], axis=1)
 
     videos_df = videos_df.join(channels_df.set_index('id'), on='channelId', rsuffix='_channel')
+    return videos_df
+
+def main():
+    videos_df = get_videos_df()
 
     print(videos_df)
     print(videos_df.loc[0])
