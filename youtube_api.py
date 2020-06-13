@@ -18,11 +18,10 @@ wl_chunks = chunk_df(wl, 50)
 
 api_key = get_api_key()
 youtube = build('youtube', 'v3', developerKey=api_key)
-request = youtube.videos().list(
+data = [youtube.videos().list(
     part="snippet,contentDetails,statistics",
-    id=','.join(wl_chunks[0]['id'])
-)
-response = request.execute()
+    id=','.join(wl_chunks[i]['id'])
+).execute() for i in range(0, len(wl_chunks))]
 
-print(response)
+print(data)
 
