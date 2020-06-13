@@ -12,16 +12,25 @@ def get_api_key():
         api_key = data['key']
     return api_key
 
-def cache(filename, get_data_fn):
+cacheTypes = {
+    "json": {
+        "load": lambda f: json.load(f),
+        "save": lambda data, f: json.dump(data, f)
+    }
+}
+def cache(filename, get_data_fn, cacher):
     if not path.exists(filename):
         data = get_data_fn()
         with open(filename, 'w') as f:
-            json.dump(data, f)
+            cacher['save'](data, f)
     else:
         with open(filename) as f:
-            data = json.load(f)
+            data = cacher['load'](f)
 
     return data
+
+def cache_json(filename, get_data_fn):
+    return cache(filename, get_data_fn, cacheTypes['json'])
 
 _youtube = False
 def youtube():
@@ -40,7 +49,7 @@ def get_videos_data(wl_chunks):
 def main():
     wl = pd.read_csv('WL.csv')
     wl_chunks = chunk_df(wl, 50)
-    data = cache("videos_data.json", lambda: get_videos_data(wl_chunks))
+    data = cache_json("videos_data.json", lambda: get_videos_data(wl_chunks))
     print(data)
 
 if __name__ == "__main__":
