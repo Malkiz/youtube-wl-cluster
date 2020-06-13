@@ -80,13 +80,29 @@ def get_videos_df():
     channels_df = pd.concat([channels_df, channels_snippet, channels_statistics, channels_topicDetails], axis=1)
 
     videos_df = videos_df.join(channels_df.set_index('id'), on='channelId', rsuffix='_channel')
-    return videos_df
+    return videos_df.set_index('id')
+
+def get_features_df(videos_df):
+    # TODO:
+    #   - mean & normalize numeric columns
+    #   - text columns? e.g. title, description
+    #   - array columns? e.g. tags, topicIds, topicCategories
+    #   - categorical columns (numeric / string): e.g. categoryId, channelTitle
+    
+    time_columns=['duration']
+    numeric_columns = ['viewCount','likeCount','dislikeCount','favoriteCount','commentCount','viewCount_channel','commentCount_channel','subscriberCount','videoCount']
+    text_columns = ['title','description','description_channel']
+    array_columns = ['tags','relevantTopicIds','topicCategories','topicIds','topicCategories_channel']
+    category_columns = ['channelId','channelTitle','categoryId']
+
+    return pd.DataFrame(videos_df, columns=numeric_columns)
 
 def main():
     videos_df = get_videos_df()
+    features_df = get_features_df(videos_df)
 
-    print(videos_df)
-    print(videos_df.loc[0])
+    print(features_df)
+    print(features_df.iloc[0])
 
 if __name__ == "__main__":
     main()
