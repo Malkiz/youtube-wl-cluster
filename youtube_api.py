@@ -1,6 +1,7 @@
 import json
 from googleapiclient.discovery import build
 import pandas as pd
+from os import path
 
 def chunk_df(df, n=10):
     return [df[i:i+n] for i in range(0,df.shape[0],n)]
@@ -11,19 +12,17 @@ def get_api_key():
         api_key = data['key']
     return api_key
 
-def get_videos_data(youtube, wl_chunks, read=True, write=True, filename="videos_data.json"):
-    if not read:
+def get_videos_data(youtube, wl_chunks, filename="videos_data.json"):
+    if not path.exists(filename):
         data = [youtube.videos().list(
             part="snippet,contentDetails,statistics",
             id=','.join(wl_chunks[i]['id'])
         ).execute() for i in range(0, len(wl_chunks))]
+        with open(filename, 'w') as f:
+            json.dump(data, f)
     else:
         with open(filename) as f:
             data = json.load(f)
-
-    if write:
-        with open(filename, 'w') as f:
-            json.dump(data, f)
 
     return data
 
