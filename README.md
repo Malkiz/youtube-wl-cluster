@@ -6,5 +6,11 @@
 ```javascript
 [...document.querySelectorAll('ytd-playlist-video-renderer.style-scope > div:nth-child(2) > a:nth-child(1)')].map(e => e.href.match(/v=([^&]*)/)[1]).join(',\n')
 ```
-5. Copy the output to a text file and save it
+5. Copy the output to a text file and save it. The file should look like this:
+```
+W6nsrjAxO3Y,
+ewtgUFSMsnY,
+4WR8Qvsv70s,
+```
+Each line is an identifier of a single youtube video.
 
