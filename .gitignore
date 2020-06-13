@@ -3,3 +3,4 @@ py_venv/
 node_modules/
 account.js
 WL.csv
+apiKey.json
