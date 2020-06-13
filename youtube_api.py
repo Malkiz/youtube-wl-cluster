@@ -12,12 +12,9 @@ def get_api_key():
         api_key = data['key']
     return api_key
 
-def get_videos_data(youtube, wl_chunks, filename="videos_data.json"):
+def cache(filename, get_data_fn):
     if not path.exists(filename):
-        data = [youtube.videos().list(
-            part="snippet,contentDetails,statistics",
-            id=','.join(wl_chunks[i]['id'])
-        ).execute() for i in range(0, len(wl_chunks))]
+        data = get_data_fn()
         with open(filename, 'w') as f:
             json.dump(data, f)
     else:
@@ -26,14 +23,22 @@ def get_videos_data(youtube, wl_chunks, filename="videos_data.json"):
 
     return data
 
+_youtube = False
+def youtube():
+    global _youtube
+    if not _youtube:
+        api_key = get_api_key()
+        _youtube = build('youtube', 'v3', developerKey=api_key)
+    return _youtube
+
+def get_videos_data(wl_chunks):
+    return [youtube().videos().list(
+        part="snippet,contentDetails,statistics",
+        id=','.join(wl_chunks[i]['id'])
+    ).execute() for i in range(0, len(wl_chunks))]
+
 wl = pd.read_csv('WL.csv')
 wl_chunks = chunk_df(wl, 50)
-
-#print(wl_chunks[0])
-
-api_key = get_api_key()
-youtube = build('youtube', 'v3', developerKey=api_key)
-data = get_videos_data(youtube, wl_chunks)
-
+data = cache("videos_data.json", lambda: get_videos_data(wl_chunks))
 print(data)
 
