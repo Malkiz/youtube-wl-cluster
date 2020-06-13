@@ -1,6 +1,7 @@
 cachetools==4.1.0
 certifi==2020.4.5.2
 chardet==3.0.4
+cycler==0.10.0
 google-api-core==1.20.0
 google-api-python-client==1.9.3
 google-auth==1.17.1
@@ -9,12 +10,15 @@ googleapis-common-protos==1.52.0
 httplib2==0.18.1
 idna==2.9
 joblib==0.15.1
+kiwisolver==1.2.0
+matplotlib==3.2.1
 numpy==1.18.5
 pandas==1.0.4
 pkg-resources==0.0.0
 protobuf==3.12.2
 pyasn1==0.4.8
 pyasn1-modules==0.2.8
+pyparsing==2.4.7
 python-dateutil==2.8.1
 pytz==2020.1
 requests==2.23.0

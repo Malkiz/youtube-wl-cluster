@@ -4,6 +4,8 @@ import pandas as pd
 from os import path
 from itertools import chain
 from sklearn.cluster import KMeans
+from sklearn import metrics
+import matplotlib.pyplot as plt
 
 def chunk_df(df, n=10):
     return [df[i:i+n] for i in range(0,df.shape[0],n)]
@@ -98,26 +100,44 @@ def get_features_df(videos_df):
 
     return pd.DataFrame(videos_df, columns=numeric_columns).fillna(0)
 
-def clustering(df):
+def clustering(df, n=3):
     # K-means
-    res = KMeans(n_clusters=3).fit_predict(df)
+    model = KMeans(n_clusters=n).fit(df)
+    labels = model.labels_
+    scores = {
+        "silhouette_score": metrics.silhouette_score(df, labels, metric='euclidean'),
+        "calinski_harabasz_score": metrics.calinski_harabasz_score(df, labels),
+        "davies_bouldin_score": metrics.davies_bouldin_score(df, labels)
+    }
 
     # PCA + K-means
     # what else?
 
-    return res
+    return (model, labels, scores)
 
 def main():
     videos_df = get_videos_df()
     features_df = get_features_df(videos_df)
-    clusters = clustering(features_df)
 
     print(features_df)
     print(features_df.iloc[0])
 
     #print(features_df.loc[features_df.isnull().any(axis=1)])
 
-    print(clusters)
+    all_scores = pd.DataFrame([])
+    for n in range(3,20):
+        model, labels, scores = clustering(features_df,n)
+        #print(n)
+        #print(model)
+        #print(labels)
+        all_scores = all_scores.append(pd.Series(scores, name=n))
+
+    print(all_scores)
+
+    ax = plt.gca()
+    for c in all_scores.columns:
+        all_scores.reset_index().plot(kind='line',x='index',y=c,ax=ax)
+    plt.show()
 
 if __name__ == "__main__":
     main()
