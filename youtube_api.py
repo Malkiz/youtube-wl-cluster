@@ -8,6 +8,7 @@ from sklearn import metrics
 import matplotlib
 matplotlib.use('TkAgg')
 import matplotlib.pyplot as plt
+import gower
 
 def chunk_df(df, n=10):
     return [df[i:i+n] for i in range(0,df.shape[0],n)]
@@ -102,23 +103,33 @@ def get_features_df(videos_df):
     array_columns = ['tags','relevantTopicIds','topicCategories','topicIds','topicCategories_channel']
     category_columns = ['channelId','channelTitle','categoryId']
 
-    return pd.DataFrame(videos_df, columns=numeric_columns).fillna(0)
+    # only numeric columns - for initial K-means test
+    #return pd.DataFrame(videos_df, columns=numeric_columns).fillna(0)
+
+    # categorical columns - for gower distance
+    return pd.DataFrame(videos_df, columns=category_columns)
 
 def clustering(df, n=3):
-    # K-means
-    model = KMeans(n_clusters=n).fit(df)
-    labels = model.labels_
-    scores = {
-        "inertia": model.inertia_,
-        "silhouette_score": metrics.silhouette_score(df, labels, metric='euclidean'),
-        "calinski_harabasz_score": metrics.calinski_harabasz_score(df, labels),
-        "davies_bouldin_score": metrics.davies_bouldin_score(df, labels)
-    }
+    def K_means(df):
+        model = KMeans(n_clusters=n).fit(df)
+        labels = model.labels_
+        scores = {
+            "inertia": model.inertia_,
+            "silhouette_score": metrics.silhouette_score(df, labels, metric='euclidean'),
+            "calinski_harabasz_score": metrics.calinski_harabasz_score(df, labels),
+            "davies_bouldin_score": metrics.davies_bouldin_score(df, labels)
+        }
+        return (model, labels, scores)
+
+    def gower_dist(df):
+        m = gower.gower_matrix(df, cat_features = [True,True,True])
+        return K_means(m)
 
     # PCA + K-means
     # what else?
 
-    return (model, labels, scores)
+
+    return gower_dist(df)
 
 def main():
     videos_df = get_videos_df()
