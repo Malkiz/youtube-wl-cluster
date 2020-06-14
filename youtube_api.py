@@ -133,6 +133,10 @@ def main():
     for n in range(3,10):
         model, labels, scores = clustering(features_df,n)
         all_scores = all_scores.append(pd.Series(scores, name=n))
+        '''print(n)
+        for i in range(0,n):
+            cluster_df = videos_df.iloc[labels == i].loc[:, ['title','channelId','channelTitle']]
+            print(cluster_df.head())'''
 
     #print(all_scores)
 
