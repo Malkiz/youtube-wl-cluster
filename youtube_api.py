@@ -107,7 +107,13 @@ def get_features_df(videos_df):
     #return pd.DataFrame(videos_df, columns=numeric_columns).fillna(0)
 
     # categorical columns - for gower distance
-    return pd.DataFrame(videos_df, columns=category_columns)
+    #return pd.DataFrame(videos_df, columns=category_columns)
+
+    # both numerical and categorical columns
+    return pd.concat([
+        videos_df.loc[:, numeric_columns].fillna(0).reset_index(),
+        pd.DataFrame(gower.gower_matrix(videos_df.loc[:, category_columns], cat_features = [True for v in category_columns]))
+    ], axis=1).set_index('id')
 
 def clustering(df, n=3):
     def K_means(df):
@@ -121,15 +127,10 @@ def clustering(df, n=3):
         }
         return (model, labels, scores)
 
-    def gower_dist(df):
-        m = gower.gower_matrix(df, cat_features = [True,True,True])
-        return K_means(m)
-
     # PCA + K-means
     # what else?
 
-
-    return gower_dist(df)
+    return K_means(df)
 
 def main():
     videos_df = get_videos_df()
@@ -150,6 +151,7 @@ def main():
             print(cluster_df.head())'''
 
     #print(all_scores)
+    #print(pd.DataFrame(videos_df, columns=['viewCount', 'categoryId', 'tags', 'title']))
 
     ax = plt.gca()
     all_scores.plot(subplots=True,ax=ax,kind='line')
