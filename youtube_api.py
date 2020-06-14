@@ -90,11 +90,13 @@ def get_videos_df():
 def get_features_df(videos_df):
     # TODO:
     #   - mean & normalize numeric columns
+    #       NOTE: K-means normalized the data automatically. But maybe it's needed for other models.
     #   - text columns? e.g. title, description
     #   - array columns? e.g. tags, topicIds, topicCategories
     #   - categorical columns (numeric / string): e.g. categoryId, channelTitle
     
     time_columns=['duration']
+    # maybe I should ignore these values, because my goal is to cluster by topic, and these nombers have nothing to do with that
     numeric_columns = ['viewCount','likeCount','dislikeCount','favoriteCount','commentCount','viewCount_channel','commentCount_channel','subscriberCount','videoCount']
     text_columns = ['title','description','description_channel']
     array_columns = ['tags','relevantTopicIds','topicCategories','topicIds','topicCategories_channel']
