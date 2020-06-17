@@ -12,6 +12,7 @@ import gower
 from sklearn.feature_extraction.text import CountVectorizer
 from sklearn.decomposition import PCA
 import numpy as np
+from sklearn import preprocessing
 
 def chunk_df(df, n=10):
     return [df[i:i+n] for i in range(0,df.shape[0],n)]
@@ -119,7 +120,7 @@ def get_features_df(videos_df):
 
     # both numerical and categorical columns
     features_df = pd.concat([
-        #videos_df.loc[:, numeric_columns].fillna(0).reset_index(),
+        #pd.DataFrame(preprocessing.normalize(videos_df.loc[:, numeric_columns].fillna(0))),
         pd.DataFrame(gower.gower_matrix(videos_df.loc[:, category_columns], cat_features = [True for v in category_columns])),
         pd.DataFrame(text)
     ], axis=1)
