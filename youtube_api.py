@@ -9,6 +9,9 @@ import matplotlib
 matplotlib.use('TkAgg')
 import matplotlib.pyplot as plt
 import gower
+from sklearn.feature_extraction.text import CountVectorizer
+from sklearn.decomposition import PCA
+import numpy as np
 
 def chunk_df(df, n=10):
     return [df[i:i+n] for i in range(0,df.shape[0],n)]
@@ -109,11 +112,38 @@ def get_features_df(videos_df):
     # categorical columns - for gower distance
     #return pd.DataFrame(videos_df, columns=category_columns)
 
+    # handle text
+    vectorizer = CountVectorizer()
+    corpus = videos_df.loc[:, text_columns].values.sum(axis=1)
+    text = vectorizer.fit_transform(corpus).toarray()
+
     # both numerical and categorical columns
-    return pd.concat([
-        videos_df.loc[:, numeric_columns].fillna(0).reset_index(),
-        pd.DataFrame(gower.gower_matrix(videos_df.loc[:, category_columns], cat_features = [True for v in category_columns]))
+    features_df = pd.concat([
+        #videos_df.loc[:, numeric_columns].fillna(0).reset_index(),
+        pd.DataFrame(gower.gower_matrix(videos_df.loc[:, category_columns], cat_features = [True for v in category_columns])),
+        pd.DataFrame(text)
+    ], axis=1)
+
+    # PCA compression
+    pca = PCA()
+    pca.fit(features_df)
+    s = np.cumsum(pca.explained_variance_ratio_)
+    variance = 0.95
+    n = min(len(s[s < variance]) + 1, len(s))
+
+    pca = PCA(n_components=n)
+
+    '''pca.fit(features_df)
+    print(pca.explained_variance_ratio_)
+    print(len(pca.explained_variance_ratio_))
+    print(np.cumsum(pca.explained_variance_ratio_))'''
+
+    features_df = pd.concat([
+        videos_df.reset_index().loc[:, 'id'],
+        pd.DataFrame(pca.fit_transform(features_df))
     ], axis=1).set_index('id')
+
+    return features_df
 
 def clustering(df, n=3):
     def K_means(df):
@@ -138,6 +168,7 @@ def main():
 
     print(features_df)
     print(features_df.iloc[0])
+    print(features_df.describe())
 
     #print(features_df.loc[features_df.isnull().any(axis=1)])
 
