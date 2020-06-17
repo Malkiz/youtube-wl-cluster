@@ -92,7 +92,7 @@ def get_videos_df():
     videos_df = videos_df.join(channels_df.set_index('id'), on='channelId', rsuffix='_channel')
     return videos_df.set_index('id')
 
-def get_features_df(videos_df):
+def get_features_df(videos_df, use_pca=True):
     # TODO:
     #   - mean & normalize numeric columns
     #       NOTE: K-means normalized the data automatically. But maybe it's needed for other models.
@@ -126,22 +126,25 @@ def get_features_df(videos_df):
     ], axis=1)
 
     # PCA compression
-    pca = PCA()
-    pca.fit(features_df)
-    s = np.cumsum(pca.explained_variance_ratio_)
-    variance = 0.95
-    n = min(len(s[s < variance]) + 1, len(s))
+    if (use_pca):
+        pca = PCA()
+        pca.fit(features_df)
+        s = np.cumsum(pca.explained_variance_ratio_)
+        variance = 0.95
+        n = min(len(s[s < variance]) + 1, len(s))
 
-    pca = PCA(n_components=n)
+        pca = PCA(n_components=n)
 
-    '''pca.fit(features_df)
-    print(pca.explained_variance_ratio_)
-    print(len(pca.explained_variance_ratio_))
-    print(np.cumsum(pca.explained_variance_ratio_))'''
+        features_df = pd.DataFrame(pca.fit_transform(features_df))
+
+        '''pca.fit(features_df)
+        print(pca.explained_variance_ratio_)
+        print(len(pca.explained_variance_ratio_))
+        print(np.cumsum(pca.explained_variance_ratio_))'''
 
     features_df = pd.concat([
         videos_df.reset_index().loc[:, 'id'],
-        pd.DataFrame(pca.fit_transform(features_df))
+        features_df
     ], axis=1).set_index('id')
 
     return features_df
