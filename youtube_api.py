@@ -179,10 +179,11 @@ def visualize(results, videos_df, features_df):
     pca = PCA(n_components=2)
     points = pca.fit_transform(features_df)
     points_df = pd.DataFrame(points)
-    for n in results.index:
-        f = plt.figure(n)
-        row = results.loc[n]
-        points_df.plot(kind='scatter', x=0, y=1, c=row['labels'], title=n, cmap=cmap)
+
+    n = results['silhouette_score'].idxmax()
+    plt.figure(n)
+    row = results.loc[n]
+    points_df.plot(kind='scatter', x=0, y=1, c=row['labels'], title=n, cmap=cmap)
 
     #input("PRESS ENTER TO CONTINUE.")
     plt.show()
