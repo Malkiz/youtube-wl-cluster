@@ -13,6 +13,7 @@ from sklearn.feature_extraction.text import CountVectorizer
 from sklearn.decomposition import PCA
 import numpy as np
 from sklearn import preprocessing
+from matplotlib import cm
 
 def chunk_df(df, n=10):
     return [df[i:i+n] for i in range(0,df.shape[0],n)]
@@ -166,6 +167,26 @@ def clustering(df, n=3):
 
     return K_means(df)
 
+def visualize(results, videos_df, features_df):
+    print(results)
+    #print(pd.DataFrame(videos_df, columns=['viewCount', 'categoryId', 'tags', 'title']))
+
+    cmap = cm.get_cmap('Spectral') # Colour map (there are many others)
+
+    plt.figure('scores')
+    results.plot(subplots=True,kind='line',y=results.columns.difference(['n','model','labels']))
+
+    pca = PCA(n_components=2)
+    points = pca.fit_transform(features_df)
+    points_df = pd.DataFrame(points)
+    for n in results.index:
+        f = plt.figure(n)
+        row = results.loc[n]
+        points_df.plot(kind='scatter', x=0, y=1, c=row['labels'], title=n, cmap=cmap)
+
+    #input("PRESS ENTER TO CONTINUE.")
+    plt.show()
+
 def main():
     videos_df = get_videos_df()
     features_df = get_features_df(videos_df)
@@ -176,21 +197,28 @@ def main():
 
     #print(features_df.loc[features_df.isnull().any(axis=1)])
 
-    all_scores = pd.DataFrame([])
-    for n in range(3,10):
+    clusters = range(3,10)
+    scores_list = []
+    models = []
+    labels_list = []
+    for n in clusters:
         model, labels, scores = clustering(features_df,n)
-        all_scores = all_scores.append(pd.Series(scores, name=n))
+        models.append(model)
+        labels_list.append(labels)
+        scores_list.append(pd.Series(scores, name=n))
+
         '''print(n)
         for i in range(0,n):
             cluster_df = videos_df.iloc[labels == i].loc[:, ['title','channelId','channelTitle']]
             print(cluster_df.head())'''
 
-    #print(all_scores)
-    #print(pd.DataFrame(videos_df, columns=['viewCount', 'categoryId', 'tags', 'title']))
+    results = pd.DataFrame(scores_list)
+    results['model'] = models
+    results['labels'] = labels_list
+    results['n'] = clusters
+    results.set_index('n')
 
-    ax = plt.gca()
-    all_scores.plot(subplots=True,ax=ax,kind='line')
-    plt.show()
+    visualize(results, videos_df, features_df)
 
 if __name__ == "__main__":
     main()
