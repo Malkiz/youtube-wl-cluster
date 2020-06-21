@@ -15,3 +15,41 @@ ewtgUFSMsnY
 ```
 Each line is an identifier of a single youtube video.
 
+## Setup env
+
+### First time
+1. Install `venv`
+```
+sudo apt-get install python3-venv
+```
+2. Create and activate env:
+```
+python3 -m venv py_venv
+source py_venv/bin/activate
+```
+3. Install packages
+```
+pip install -r py_freeze.txt
+```
+
+### Development
+1. activate env
+```
+source py_venv/bin/activate
+```
+2. run script
+```
+python youtube_api.py
+```
+
+### Save new python dependencies
+1. If you install new dependencies, save them:
+```
+pip3 freeze > py_freeze.txt
+```
+2. git commit
+
+### Close the dev env
+```
+deactivate
+```
