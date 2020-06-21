@@ -1,4 +1,8 @@
 ## Getting the initial playlist data
+0. make sure you have the file `apiKey.json` that looks like this:
+```
+{"key":"<youtube-api-key>"}
+```
 1. Login to YouTube
 2. Go to https://www.youtube.com/playlist?list=WL
 3. Scroll all the way to the bottom of the page. Do this until the entire list is loaded to the page.
