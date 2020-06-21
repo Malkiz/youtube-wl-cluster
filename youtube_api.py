@@ -100,7 +100,7 @@ def get_features_df(videos_df, use_pca=True):
     #   - text columns? e.g. title, description
     #   - array columns? e.g. tags, topicIds, topicCategories
     #   - categorical columns (numeric / string): e.g. categoryId, channelTitle
-    
+
     time_columns=['duration']
     # maybe I should ignore these values, because my goal is to cluster by topic, and these nombers have nothing to do with that
     numeric_columns = ['viewCount','likeCount','dislikeCount','favoriteCount','commentCount','viewCount_channel','commentCount_channel','subscriberCount','videoCount']
