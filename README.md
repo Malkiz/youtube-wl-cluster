@@ -22,9 +22,9 @@ Each line is an identifier of a single youtube video.
 ## Setup env
 
 ### First time
-1. Install `venv`
+1. Install dependencies
 ```
-sudo apt-get install python3-venv
+sudo apt-get install python3-venv python3-tk
 ```
 2. Create and activate env:
 ```
