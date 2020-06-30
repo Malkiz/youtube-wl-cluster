@@ -187,9 +187,6 @@ def clustering(df, n=3):
     return K_means(df)
 
 def visualize(results, videos_df, features_df, dim_reduction='pca'):
-    print(results)
-    #print(pd.DataFrame(videos_df, columns=['viewCount', 'categoryId', 'tags', 'title']))
-
     cmap = cm.get_cmap('Spectral') # Colour map (there are many others)
 
     results.plot(subplots=True,kind='line',y=results.columns.difference(['n','model','labels']))
@@ -201,26 +198,24 @@ def visualize(results, videos_df, features_df, dim_reduction='pca'):
             transformer = FactorAnalysis(n_components=2)
         points = transformer.fit_transform(features_df)
         points_df = pd.DataFrame(points)
-        print(points_df)
 
         n = results['silhouette_score'].idxmax()
         row = results.loc[n]
         points_df.plot(kind='scatter', x=0, y=1, c=row['labels'], title=n, cmap=cmap)
 
-    #input("PRESS ENTER TO CONTINUE.")
     plt.show()
 
 def main():
     videos_df = get_videos_df()
     features_df = get_features_df(videos_df)
 
-    print(features_df)
-    print(features_df.iloc[0])
+    #print(features_df)
+    #print(features_df.iloc[0])
     #print(features_df.describe())
 
     #print(features_df.loc[features_df.isnull().any(axis=1)])
 
-    clusters = range(3,10)
+    clusters = range(3,21)
     scores_list = []
     models = []
     labels_list = []
@@ -230,10 +225,14 @@ def main():
         labels_list.append(labels)
         scores_list.append(pd.Series(scores, name=n))
 
+        videos_df['{} labels'.format(n)] = labels
+
         '''print(n)
         for i in range(0,n):
             cluster_df = videos_df.iloc[labels == i].loc[:, ['title','channelId','channelTitle']]
             print(cluster_df.head())'''
+
+    videos_df.to_csv('out.csv')
 
     results = pd.DataFrame(scores_list)
     results['model'] = models
