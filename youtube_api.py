@@ -200,11 +200,12 @@ def visualize(results, videos_df, features_df, dim_reduction='pca'):
         elif (dim_reduction == 'mca'):
             transformer = FactorAnalysis(n_components=2)
         points = transformer.fit_transform(features_df)
-    points_df = pd.DataFrame(points)
+        points_df = pd.DataFrame(points)
+        print(points_df)
 
-    n = results['silhouette_score'].idxmax()
-    row = results.loc[n]
-    points_df.plot(kind='scatter', x=0, y=1, c=row['labels'], title=n, cmap=cmap)
+        n = results['silhouette_score'].idxmax()
+        row = results.loc[n]
+        points_df.plot(kind='scatter', x=0, y=1, c=row['labels'], title=n, cmap=cmap)
 
     #input("PRESS ENTER TO CONTINUE.")
     plt.show()
