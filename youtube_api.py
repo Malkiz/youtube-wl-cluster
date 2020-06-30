@@ -107,7 +107,7 @@ def get_features_df(videos_df, use_pca=False):
     numeric_columns = ['viewCount','likeCount','dislikeCount','favoriteCount','commentCount','viewCount_channel','commentCount_channel','subscriberCount','videoCount']
     text_columns = ['title','description','description_channel']
     array_columns = ['tags','relevantTopicIds','topicCategories','topicIds','topicCategories_channel']
-    category_columns = ['channelId','channelTitle','categoryId']
+    category_columns = ['channelId','categoryId']
 
     # only numeric columns - for initial K-means test
     #return pd.DataFrame(videos_df, columns=numeric_columns).fillna(0)
@@ -139,8 +139,11 @@ def get_features_df(videos_df, use_pca=False):
     #print(pd.get_dummies(videos_df.loc[:,"tags"]))
     #print(get_array_dummies(videos_df, 'tags'))
     dummies_arr = map(lambda col: get_array_dummies(videos_df, col), array_columns)
-    dummies_df = pd.concat(dummies_arr, axis=1, sort=False)
-    features_df = dummies_df
+    dummies_df1 = pd.concat(dummies_arr, axis=1, sort=False)
+
+    dummies_df2 = pd.concat(map(lambda col: pd.get_dummies(videos_df[col].fillna(''), dtype=int), category_columns), axis=1, sort=False)
+
+    features_df = pd.concat([dummies_df1, dummies_df2], axis=1, sort=False)
 
     # PCA compression
     if (use_pca):
@@ -159,7 +162,7 @@ def get_features_df(videos_df, use_pca=False):
         print(len(pca.explained_variance_ratio_))
         print(np.cumsum(pca.explained_variance_ratio_))'''
 
-    '''features_df = pd.concat([
+    '''features_df = pd.concat([1, dummies_df2], axis=1, sort=False)
         videos_df.reset_index().loc[:, 'id'],
         features_df
     ], axis=1).set_index('id')'''
@@ -189,7 +192,6 @@ def visualize(results, videos_df, features_df, dim_reduction='pca'):
 
     cmap = cm.get_cmap('Spectral') # Colour map (there are many others)
 
-    plt.figure('scores')
     results.plot(subplots=True,kind='line',y=results.columns.difference(['n','model','labels']))
 
     if (dim_reduction):
@@ -201,7 +203,6 @@ def visualize(results, videos_df, features_df, dim_reduction='pca'):
     points_df = pd.DataFrame(points)
 
     n = results['silhouette_score'].idxmax()
-    plt.figure(n)
     row = results.loc[n]
     points_df.plot(kind='scatter', x=0, y=1, c=row['labels'], title=n, cmap=cmap)
 
