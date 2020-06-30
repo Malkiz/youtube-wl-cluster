@@ -138,6 +138,7 @@ def get_features_df(videos_df, use_pca=False):
     #print(len(set([st for row in videos_df.loc[:,"tags"].fillna('') for st in row])))
     #print(pd.get_dummies(videos_df.loc[:,"tags"]))
     #print(get_array_dummies(videos_df, 'tags'))
+
     dummies_arr = map(lambda col: get_array_dummies(videos_df, col), array_columns)
     dummies_df1 = pd.concat(dummies_arr, axis=1, sort=False)
 
@@ -145,13 +146,18 @@ def get_features_df(videos_df, use_pca=False):
 
     features_df = pd.concat([dummies_df1, dummies_df2], axis=1, sort=False)
 
+    print('features is {} dimentions'.format(len(features_df.columns)))
+
     # PCA compression
     if (use_pca):
+        print('PCA compression...')
         pca = PCA()
         pca.fit(features_df)
         s = np.cumsum(pca.explained_variance_ratio_)
         variance = 0.95
         n = min(len(s[s < variance]) + 1, len(s))
+
+        print('compressing into {} dimentions for keeping {} variance'.format(n, variance))
 
         pca = PCA(n_components=n)
 
@@ -215,22 +221,19 @@ def main():
 
     #print(features_df.loc[features_df.isnull().any(axis=1)])
 
-    clusters = range(3,21)
+    clusters = range(3,11)
     scores_list = []
     models = []
     labels_list = []
     for n in clusters:
+        print('cluster into {} groups...'.format(n))
         model, labels, scores = clustering(features_df,n)
+        print(scores)
         models.append(model)
         labels_list.append(labels)
         scores_list.append(pd.Series(scores, name=n))
 
         videos_df['{} labels'.format(n)] = labels
-
-        '''print(n)
-        for i in range(0,n):
-            cluster_df = videos_df.iloc[labels == i].loc[:, ['title','channelId','channelTitle']]
-            print(cluster_df.head())'''
 
     videos_df.to_csv('out.csv')
 
