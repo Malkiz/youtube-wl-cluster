@@ -14,6 +14,7 @@ from sklearn.decomposition import PCA
 import numpy as np
 from sklearn import preprocessing
 from matplotlib import cm
+from sklearn.decomposition import FactorAnalysis
 
 def chunk_df(df, n=10):
     return [df[i:i+n] for i in range(0,df.shape[0],n)]
@@ -93,7 +94,7 @@ def get_videos_df():
     videos_df = videos_df.join(channels_df.set_index('id'), on='channelId', rsuffix='_channel')
     return videos_df.set_index('id')
 
-def get_features_df(videos_df, use_pca=True):
+def get_features_df(videos_df, use_pca=False):
     # TODO:
     #   - mean & normalize numeric columns
     #       NOTE: K-means normalized the data automatically. But maybe it's needed for other models.
@@ -114,7 +115,7 @@ def get_features_df(videos_df, use_pca=True):
     # categorical columns - for gower distance
     #return pd.DataFrame(videos_df, columns=category_columns)
 
-    # handle text
+    '''# handle text
     vectorizer = CountVectorizer()
     corpus = videos_df.loc[:, text_columns].values.sum(axis=1)
     text = vectorizer.fit_transform(corpus).toarray()
@@ -124,7 +125,22 @@ def get_features_df(videos_df, use_pca=True):
         #pd.DataFrame(preprocessing.normalize(videos_df.loc[:, numeric_columns].fillna(0))),
         pd.DataFrame(gower.gower_matrix(videos_df.loc[:, category_columns], cat_features = [True for v in category_columns])),
         pd.DataFrame(text)
-    ], axis=1)
+    ], axis=1)'''
+
+    def get_array_dummies(df, column):
+        return pd.get_dummies(df[column].fillna('').apply(pd.Series).stack(), dtype=int).sum(level=0)
+
+    # try next: use only [categoryId, tags, (channelId)] as features.
+    # I have a feeling that this will give better results
+    # I will need to convert the 'tags' arrays into "bag of words" somehow
+    #print(videos_df.loc[:,array_columns].fillna(''))
+    #print(videos_df.loc[:,'tags'].fillna('').map(lambda x: ' '.join(x)))
+    #print(len(set([st for row in videos_df.loc[:,"tags"].fillna('') for st in row])))
+    #print(pd.get_dummies(videos_df.loc[:,"tags"]))
+    #print(get_array_dummies(videos_df, 'tags'))
+    dummies_arr = map(lambda col: get_array_dummies(videos_df, col), array_columns)
+    dummies_df = pd.concat(dummies_arr, axis=1, sort=False)
+    features_df = dummies_df
 
     # PCA compression
     if (use_pca):
@@ -143,10 +159,10 @@ def get_features_df(videos_df, use_pca=True):
         print(len(pca.explained_variance_ratio_))
         print(np.cumsum(pca.explained_variance_ratio_))'''
 
-    features_df = pd.concat([
+    '''features_df = pd.concat([
         videos_df.reset_index().loc[:, 'id'],
         features_df
-    ], axis=1).set_index('id')
+    ], axis=1).set_index('id')'''
 
     return features_df
 
@@ -167,7 +183,7 @@ def clustering(df, n=3):
 
     return K_means(df)
 
-def visualize(results, videos_df, features_df):
+def visualize(results, videos_df, features_df, dim_reduction='pca'):
     print(results)
     #print(pd.DataFrame(videos_df, columns=['viewCount', 'categoryId', 'tags', 'title']))
 
@@ -176,8 +192,12 @@ def visualize(results, videos_df, features_df):
     plt.figure('scores')
     results.plot(subplots=True,kind='line',y=results.columns.difference(['n','model','labels']))
 
-    pca = PCA(n_components=2)
-    points = pca.fit_transform(features_df)
+    if (dim_reduction):
+        if (dim_reduction == 'pca'):
+            transformer = PCA(n_components=2)
+        elif (dim_reduction == 'mca'):
+            transformer = FactorAnalysis(n_components=2)
+        points = transformer.fit_transform(features_df)
     points_df = pd.DataFrame(points)
 
     n = results['silhouette_score'].idxmax()
@@ -194,7 +214,7 @@ def main():
 
     print(features_df)
     print(features_df.iloc[0])
-    print(features_df.describe())
+    #print(features_df.describe())
 
     #print(features_df.loc[features_df.isnull().any(axis=1)])
 
