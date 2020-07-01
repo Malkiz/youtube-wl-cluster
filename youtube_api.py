@@ -203,7 +203,8 @@ def visualize(results, videos_df, features_df):
         points_df = pd.DataFrame(points)
 
         n = results[args.scorer].idxmax()
-        print('best clustering according to {}: {} groups, score {}'.format(args.scorer, n, results.at[n, args.scorer]))
+        title = 'best clustering according to {}: {} groups, score {}'.format(args.scorer, n, results.at[n, args.scorer])
+        print(title)
         row = results.loc[n]
         c = row['labels']
 
@@ -218,6 +219,7 @@ def visualize(results, videos_df, features_df):
             fig = plt.figure()
             ax = fig.add_subplot(111, projection='3d')
             sc = ax.scatter(x_vals, y_vals, z_vals, c=c, cmap=cmap)
+        ax.set_title(title)
 
         annot = ax.annotate("", xy=(0,0), xytext=(20,20),textcoords="offset points",
                             bbox=dict(boxstyle="round", fc="w"),
