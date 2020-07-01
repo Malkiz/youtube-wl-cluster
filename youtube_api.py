@@ -224,7 +224,8 @@ def clustering(all_dfs_dict, n, index, init=pd.DataFrame()):
         if 'compress' in s:
             features_df = compress(features_df, s['compress'])
 
-        m, l, s = actions[s['method']](features_df)
+        m_args = s['args'] if 'args' in s else {}
+        m, l, s = actions[s['method']](features_df, *m_args)
         curr_res = pd.get_dummies(l, dtype=int)
         curr_res.index = index
 
@@ -309,10 +310,9 @@ def main():
     unique_data = set(itertools.chain.from_iterable([s['data'] for s in args.stages]))
     all_dfs_dict = get_features_df(videos_df, unique_data)
 
-    init = pd.DataFrame()
     stage0 = args.stages[0]
+    init = join_features(pd.DataFrame(index=videos_df.index), all_dfs_dict, stage0['data'])
     if 'compress' in stage0:
-        init = join_features(pd.DataFrame(index=videos_df.index), all_dfs_dict, stage0['data'])
         init = compress(init, stage0['compress'])
         stage0.pop('compress', None)
 
@@ -362,7 +362,10 @@ if __name__ == "__main__":
     stages = []
     for s in args.stages.split('|'):
         x = s.split(':')
-        stage = {'method':x[0]}
+        m = x[0].split('@')
+        stage = {'method':m[0]}
+        if len(m) > 1:
+            stage['args'] = m[1].split(',')
         x = x[1].split('>')
         stage['data'] = x[0].split(',')
         if len(x) > 1:
