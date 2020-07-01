@@ -185,33 +185,41 @@ def clustering(df, n=3):
 
     return K_means(df)
 
-def visualize(results, videos_df, features_df, dim_reduction='pca'):
+def visualize(results, videos_df, features_df, dim_reduction='pca', n_components=3):
     cmap = cm.get_cmap('Spectral') # Colour map (there are many others)
 
     results.plot(subplots=True,kind='line',y=results.columns.difference(['n','model','labels']))
 
     if (dim_reduction):
         if (dim_reduction == 'pca'):
-            transformer = PCA(n_components=2)
+            transformer = PCA(n_components)
         elif (dim_reduction == 'mca'):
-            transformer = FactorAnalysis(n_components=2)
+            transformer = FactorAnalysis(n_components)
         points = transformer.fit_transform(features_df)
         points_df = pd.DataFrame(points)
 
         n = results['silhouette_score'].idxmax()
         row = results.loc[n]
-
-        fig,ax = plt.subplots()
         c = row['labels']
-        sc = plt.scatter(points_df.loc[:,0], points_df.loc[:,1], c=c, cmap=cmap)
-        #points_df.plot(kind='scatter', x=0, y=1, c=row['labels'], title=n, cmap=cmap)
+
+        x_vals = points_df.loc[:,0]
+        y_vals = points_df.loc[:,1]
+
+        if (n_components == 2):
+            fig,ax = plt.subplots()
+            sc = plt.scatter(x_vals, y_vals, c=c, cmap=cmap)
+        elif (n_components == 3):
+            z_vals = points_df.loc[:,2]
+            fig = plt.figure()
+            ax = fig.add_subplot(111, projection='3d')
+            sc = ax.scatter(x_vals, y_vals, z_vals, c=c, cmap=cmap)
+
         annot = ax.annotate("", xy=(0,0), xytext=(20,20),textcoords="offset points",
                             bbox=dict(boxstyle="round", fc="w"),
                             arrowprops=dict(arrowstyle="->"))
         annot.set_visible(False)
         names = videos_df['title'].reset_index(drop=True)
         norm = plt.Normalize(1,4)
-        #pos = points_df.min()
 
         def get_text(ind):
             return "\n".join([names[n] for n in ind["ind"]])
