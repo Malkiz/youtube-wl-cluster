@@ -151,9 +151,9 @@ def get_features_df(videos_df):
         pca = PCA()
         pca.fit(features_df)
         s = np.cumsum(pca.explained_variance_ratio_)
-        n = min(len(s[s < args.variance]) + 1, len(s))
+        n = min(len(s[s < args.pca_variance]) + 1, len(s))
 
-        print('compressing into {} dimentions for keeping {} variance'.format(n, args.variance))
+        print('compressing into {} dimentions for keeping {} variance'.format(n, args.pca_variance))
 
         pca = PCA(n_components=n)
 
@@ -291,7 +291,7 @@ if __name__ == "__main__":
     parser.add_argument('--categorical',help='use categorical data columns', action='store_true', default=False)
     parser.add_argument('--text',help='use text data columns', action='store_true', default=False)
     parser.add_argument('--pca',help='compress the features dataframe using pca', action='store_true', default=False)
-    parser.add_argument('--pca-variance',help='if using pca, how much variance to retain',type=float,default=0.95)
+    parser.add_argument('--pca_variance',help='if using pca, how much variance to retain',type=float,default=0.95)
     parser.add_argument('--display',help='how to display the scatter plot: 2d/3d', choices=[2,3], type=int, default=3)
     parser.add_argument('--display_transform',help='how to transform the data before displaying it', choices=['', 'pca', 'mca'], type=str, default='pca')
     parser.add_argument('--min_clusters',help='minimum number of clusters',type=int,default=3)
