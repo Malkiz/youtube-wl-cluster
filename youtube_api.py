@@ -157,16 +157,16 @@ def get_features_df(videos_df, data_sets):
     all_dfs_dict = {n: data_getters[n]() for n in data_sets }
     return all_dfs_dict
 
-
+def compress(features_df, options):
     # PCA compression
-    if (args.pca):
+    if (options['method'] == 'pca'):
         print('PCA compression...')
         pca = PCA()
         pca.fit(features_df)
         s = np.cumsum(pca.explained_variance_ratio_)
-        n = min(len(s[s < args.pca_variance]) + 1, len(s))
+        n = min(len(s[s < options['variance']]) + 1, len(s))
 
-        print('compressing into {} dimentions for keeping {} variance'.format(n, args.pca_variance))
+        print('compressing into {} dimentions for keeping {} variance'.format(n, options['variance']))
 
         pca = PCA(n_components=n)
 
@@ -181,7 +181,7 @@ def get_features_df(videos_df, data_sets):
 
     return features_df
 
-def clustering(all_dfs_dict, n, index):
+def clustering(all_dfs_dict, n, index, init=pd.DataFrame()):
     def K_means(df):
         model = KMeans(n_clusters=n).fit(df)
         labels = model.labels_
@@ -215,14 +215,25 @@ def clustering(all_dfs_dict, n, index):
     curr_res = pd.DataFrame(index=index)
 
     for s in args.stages:
-        features_df = pd.concat([curr_res]+[all_dfs_dict[d] for d in s['data']], axis=1, sort=False)
-        print('features is {} dimentions'.format(len(features_df.columns)))
+        if not init.empty:
+            features_df = init
+            init = pd.DataFrame()
+        else:
+            features_df = join_features(curr_res, all_dfs_dict, s)
+
+        if 'compress' in s:
+            features_df = compress(features_df, s['compress'])
 
         m, l, s = actions[s['method']](features_df)
         curr_res = pd.get_dummies(l, dtype=int)
         curr_res.index = index
 
     return m, l, s, features_df
+
+def join_features(curr_res, all_dfs_dict, s):
+        features_df = pd.concat([curr_res]+[all_dfs_dict[d] for d in s['data']], axis=1, sort=False)
+        print('features is {} dimentions'.format(len(features_df.columns)))
+        return features_df
 
 def visualize(results, videos_df):
     cmap = cm.get_cmap('Spectral') # Colour map (there are many others)
@@ -305,6 +316,13 @@ def main():
 
     #print(features_df.loc[features_df.isnull().any(axis=1)])
 
+    init = pd.DataFrame()
+    stage0 = args.stages[0]
+    if 'compress' in stage0:
+        init = join_features(pd.DataFrame(index=videos_df.index), all_dfs_dict, stage0)
+        init = compress(init, stage0['compress'])
+        stage0.pop('compress', None)
+
     clusters = range(args.min_clusters,args.max_clusters+1)
     print('clustering over {}'.format(clusters))
     scores_list = []
@@ -313,7 +331,7 @@ def main():
     feat_list = []
     for n in clusters:
         print('cluster into {} groups...'.format(n))
-        model, labels, scores, features_df = clustering(all_dfs_dict,n,videos_df.index)
+        model, labels, scores, features_df = clustering(all_dfs_dict,n,videos_df.index, init)
         print(scores)
         models.append(model)
         labels_list.append(labels)
@@ -337,24 +355,29 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser(description='cluster videos from a youtube playlist based on the available data')
     parser.add_argument('-v','--version',help='display version', action='store_true')
     parser.add_argument('--file', help='the filename containing the playlist video ids', type=str, default='WL.csv')
-    parser.add_argument('--pca',help='compress the features dataframe using pca', action='store_true', default=False)
-    parser.add_argument('--pca_variance',help='if using pca, how much variance to retain',type=float,default=0.95)
     parser.add_argument('--display',help='how to display the scatter plot: 2d/3d', choices=[2,3], type=int, default=3)
     parser.add_argument('--display_transform',help='how to transform the data before displaying it', choices=['', 'pca', 'mca'], type=str, default='pca')
     parser.add_argument('--min_clusters',help='minimum number of clusters',type=int,default=3)
     parser.add_argument('--max_clusters',help='maximum number of clusters',type=int,default=10)
     parser.add_argument('--scorer',help='the scorer to use for choosing the best cluster',type=str,default='silhouette_score',choices=['silhouette_score','inertia','calinski_harabasz_score','davies_bouldin_score'])
     parser.add_argument('--scorers',help='which scorers to calculate',type=str,default='silhouette_score,inertia,calinski_harabasz_score,davies_bouldin_score')
-    parser.add_argument('--stages',help='stages of clustering',type=str,default='best_K_means:array,text|best_K_means:categorical_1')
+    parser.add_argument('--stages',help='stages of clustering',type=str,default='best_K_means:array,text>pca,0.99|best_K_means:categorical_1')
  
     args = parser.parse_args()
     args.scorers = args.scorers.split(',')
     if args.scorer not in args.scorers:
         raise ValueError('the selected scorer {} is not present in the scorers list {}'.format(args.scorer, args.scorers))
     
-    stages = args.stages.split('|')
-    stages = [s.split(':') for s in stages]
-    stages = [{'method':s[0], 'data':s[1].split(',')} for s in stages]
+    stages = []
+    for s in args.stages.split('|'):
+        x = s.split(':')
+        stage = {'method':x[0]}
+        x = x[1].split('>')
+        stage['data'] = x[0].split(',')
+        if len(x) > 1:
+            c = x[1].split(',')
+            stage['compress'] = {'method':c[0], 'variance':float(c[1])}
+        stages.append(stage)
     args.stages = stages
 
     if args.version:
