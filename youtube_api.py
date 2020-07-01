@@ -222,7 +222,7 @@ def visualize(results, videos_df, features_df):
                             bbox=dict(boxstyle="round", fc="w"),
                             arrowprops=dict(arrowstyle="->"))
         annot.set_visible(False)
-        names = (videos_df['channelTitle'] + '|' + videos_df['title']).reset_index(drop=True)
+        names = (pd.DataFrame(c, index=videos_df.index)[0].astype(str) + '|' + videos_df['channelTitle'] + '|' + videos_df['title']).reset_index(drop=True)
         norm = plt.Normalize(1,4)
 
         def get_text(ind):
@@ -291,7 +291,7 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser(description='cluster videos from a youtube playlist based on the available data')
     parser.add_argument('-v','--version',help='display version', action='store_true')
     parser.add_argument('--file', help='the filename containing the playlist video ids', type=str, default='WL.csv')
-    parser.add_argument('--array',help='use array data columns', action='store_true', default=True)
+    parser.add_argument('--array',help='use array data columns', action='store_true', default=False)
     parser.add_argument('--numerical',help='use numerical data columns', action='store_true', default=False)
     parser.add_argument('--categorical',help='use categorical data columns', action='store_true', default=False)
     parser.add_argument('--text',help='use text data columns', action='store_true', default=False)
