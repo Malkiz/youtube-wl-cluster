@@ -219,7 +219,7 @@ def clustering(all_dfs_dict, n, index, init=pd.DataFrame()):
             features_df = init
             init = pd.DataFrame()
         else:
-            features_df = join_features(curr_res, all_dfs_dict, s)
+            features_df = join_features(curr_res, all_dfs_dict, s['data'])
 
         if 'compress' in s:
             features_df = compress(features_df, s['compress'])
@@ -228,14 +228,14 @@ def clustering(all_dfs_dict, n, index, init=pd.DataFrame()):
         curr_res = pd.get_dummies(l, dtype=int)
         curr_res.index = index
 
-    return m, l, s, features_df
+    return m, l, s
 
-def join_features(curr_res, all_dfs_dict, s):
-        features_df = pd.concat([curr_res]+[all_dfs_dict[d] for d in s['data']], axis=1, sort=False)
+def join_features(curr_res, all_dfs_dict, data):
+        features_df = pd.concat([curr_res]+[all_dfs_dict[d] for d in data], axis=1, sort=False)
         print('features is {} dimentions'.format(len(features_df.columns)))
         return features_df
 
-def visualize(results, videos_df):
+def visualize(results, videos_df, features_df):
     cmap = cm.get_cmap('Spectral') # Colour map (there are many others)
 
     results.plot(subplots=True,kind='line',y=results.columns.difference(['n','model','labels']))
@@ -243,7 +243,6 @@ def visualize(results, videos_df):
     if (args.display_transform):
         n = results[args.scorer].idxmax()
         row = results.loc[n]
-        features_df = row['features']
 
         n_components = min(args.display, len(features_df.columns))
         if (args.display_transform == 'pca'):
@@ -310,16 +309,10 @@ def main():
     unique_data = set(itertools.chain.from_iterable([s['data'] for s in args.stages]))
     all_dfs_dict = get_features_df(videos_df, unique_data)
 
-    #print(features_df)
-    #print(features_df.iloc[0])
-    #print(features_df.describe())
-
-    #print(features_df.loc[features_df.isnull().any(axis=1)])
-
     init = pd.DataFrame()
     stage0 = args.stages[0]
     if 'compress' in stage0:
-        init = join_features(pd.DataFrame(index=videos_df.index), all_dfs_dict, stage0)
+        init = join_features(pd.DataFrame(index=videos_df.index), all_dfs_dict, stage0['data'])
         init = compress(init, stage0['compress'])
         stage0.pop('compress', None)
 
@@ -328,15 +321,13 @@ def main():
     scores_list = []
     models = []
     labels_list = []
-    feat_list = []
     for n in clusters:
         print('cluster into {} groups...'.format(n))
-        model, labels, scores, features_df = clustering(all_dfs_dict,n,videos_df.index, init)
+        model, labels, scores = clustering(all_dfs_dict,n,videos_df.index, init)
         print(scores)
         models.append(model)
         labels_list.append(labels)
         scores_list.append(pd.Series(scores, name=n))
-        feat_list.append(features_df)
 
         videos_df['{} labels'.format(n)] = labels
 
@@ -345,11 +336,11 @@ def main():
     results = pd.DataFrame(scores_list)
     results['model'] = models
     results['labels'] = labels_list
-    results['features'] = feat_list
     results['n'] = clusters
     results.set_index('n')
 
-    visualize(results, videos_df)
+    features_df = join_features(pd.DataFrame(index=videos_df.index), all_dfs_dict, unique_data)
+    visualize(results, videos_df, features_df)
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description='cluster videos from a youtube playlist based on the available data')
