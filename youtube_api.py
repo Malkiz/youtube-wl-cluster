@@ -154,11 +154,9 @@ def get_features_df(videos_df, data_sets):
         'array':array,
         'categorical_2':categorical_2
     }
-    all_dfs = [data_getters[n]() for n in data_sets]
-    return all_dfs
+    all_dfs_dict = {n: data_getters[n]() for n in data_sets }
+    return all_dfs_dict
 
-    features_df = pd.concat(all_dfs, axis=1, sort=False)
-    print('features is {} dimentions'.format(len(features_df.columns)))
 
     # PCA compression
     if (args.pca):
@@ -183,7 +181,7 @@ def get_features_df(videos_df, data_sets):
 
     return features_df
 
-def clustering(df, n=3):
+def clustering(all_dfs_dict, n, index):
     def K_means(df):
         model = KMeans(n_clusters=n).fit(df)
         labels = model.labels_
@@ -209,14 +207,33 @@ def clustering(df, n=3):
     # PCA + K-means
     # what else?
 
-    return best_K_means(df)
+    actions = {
+        'best_K_means':best_K_means,
+        'K_means':K_means
+    }
 
-def visualize(results, videos_df, features_df):
+    curr_res = pd.DataFrame(index=index)
+
+    for s in args.stages:
+        features_df = pd.concat([curr_res]+[all_dfs_dict[d] for d in s['data']], axis=1, sort=False)
+        print('features is {} dimentions'.format(len(features_df.columns)))
+
+        m, l, s = actions[s['method']](features_df)
+        curr_res = pd.get_dummies(l, dtype=int)
+        curr_res.index = index
+
+    return m, l, s, features_df
+
+def visualize(results, videos_df):
     cmap = cm.get_cmap('Spectral') # Colour map (there are many others)
 
     results.plot(subplots=True,kind='line',y=results.columns.difference(['n','model','labels']))
 
     if (args.display_transform):
+        n = results[args.scorer].idxmax()
+        row = results.loc[n]
+        features_df = row['features']
+
         n_components = min(args.display, len(features_df.columns))
         if (args.display_transform == 'pca'):
             transformer = PCA(n_components)
@@ -225,10 +242,8 @@ def visualize(results, videos_df, features_df):
         points = transformer.fit_transform(features_df)
         points_df = pd.DataFrame(points)
 
-        n = results[args.scorer].idxmax()
         title = 'best clustering according to {}: {} groups, score {}'.format(args.scorer, n, results.at[n, args.scorer])
         print(title)
-        row = results.loc[n]
         c = row['labels']
 
         x_vals = points_df.loc[:,0]
@@ -295,13 +310,15 @@ def main():
     scores_list = []
     models = []
     labels_list = []
+    feat_list = []
     for n in clusters:
         print('cluster into {} groups...'.format(n))
-        model, labels, scores = clustering(features_df,n)
+        model, labels, scores, features_df = clustering(all_dfs_dict,n,videos_df.index)
         print(scores)
         models.append(model)
         labels_list.append(labels)
         scores_list.append(pd.Series(scores, name=n))
+        feat_list.append(features_df)
 
         videos_df['{} labels'.format(n)] = labels
 
@@ -310,10 +327,11 @@ def main():
     results = pd.DataFrame(scores_list)
     results['model'] = models
     results['labels'] = labels_list
+    results['features'] = feat_list
     results['n'] = clusters
     results.set_index('n')
 
-    visualize(results, videos_df, features_df)
+    visualize(results, videos_df)
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description='cluster videos from a youtube playlist based on the available data')
