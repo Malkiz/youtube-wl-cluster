@@ -203,6 +203,7 @@ def visualize(results, videos_df, features_df):
         points_df = pd.DataFrame(points)
 
         n = results[args.scorer].idxmax()
+        print('best clustering according to {}: {} groups, score {}'.format(args.scorer, n, results.at[n, args.scorer]))
         row = results.loc[n]
         c = row['labels']
 
