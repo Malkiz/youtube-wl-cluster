@@ -199,7 +199,7 @@ def visualize(results, videos_df, features_df):
         points = transformer.fit_transform(features_df)
         points_df = pd.DataFrame(points)
 
-        n = results['silhouette_score'].idxmax()
+        n = results[args.scorer].idxmax()
         row = results.loc[n]
         c = row['labels']
 
@@ -297,6 +297,7 @@ if __name__ == "__main__":
     parser.add_argument('--display_transform',help='how to transform the data before displaying it', choices=['', 'pca', 'mca'], type=str, default='pca')
     parser.add_argument('--min_clusters',help='minimum number of clusters',type=int,default=3)
     parser.add_argument('--max_clusters',help='maximum number of clusters',type=int,default=10)
+    parser.add_argument('--scorer',help='the scorer to use for choosing the best cluster',type=str,default='silhouette_score',choices=['silhouette_score','inertia','calinski_harabasz_score','davies_bouldin_score'])
  
     args = parser.parse_args()
 
