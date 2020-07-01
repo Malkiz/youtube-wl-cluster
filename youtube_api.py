@@ -222,7 +222,7 @@ def visualize(results, videos_df, features_df):
                             bbox=dict(boxstyle="round", fc="w"),
                             arrowprops=dict(arrowstyle="->"))
         annot.set_visible(False)
-        names = videos_df['title'].reset_index(drop=True)
+        names = (videos_df['channelTitle'] + '|' + videos_df['title']).reset_index(drop=True)
         norm = plt.Normalize(1,4)
 
         def get_text(ind):
