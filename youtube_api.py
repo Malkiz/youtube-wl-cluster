@@ -196,9 +196,9 @@ def clustering(all_dfs_dict, n, index, init=pd.DataFrame()):
             scores["davies_bouldin_score"] = metrics.davies_bouldin_score(df, labels)
         return (model, labels, scores)
 
-    def best_K_means(df):
+    def best_K_means(df, repeat=3):
         bm, bl, bs = K_means(df)
-        for i in range(0,2):
+        for i in range(0,int(repeat)-1):
             m, l, s = K_means(df)
             if (s[args.scorer] > bs[args.scorer]):
                 bm, bl, bs = (m, l, s)
