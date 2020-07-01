@@ -180,7 +180,7 @@ def clustering(df, n=3):
         labels = model.labels_
         scores = {}
         if 'inertia' in args.scorers:
-            scores["inertia"] = model.inertia_
+            scores["inertia"] = - model.inertia_
         if 'silhouette_score' in args.scorers:
             scores["silhouette_score"] = metrics.silhouette_score(df, labels, metric='euclidean')
         if 'calinski_harabasz_score' in args.scorers:
@@ -189,10 +189,18 @@ def clustering(df, n=3):
             scores["davies_bouldin_score"] = metrics.davies_bouldin_score(df, labels)
         return (model, labels, scores)
 
+    def best_K_means(df):
+        bm, bl, bs = K_means(df)
+        for i in range(0,2):
+            m, l, s = K_means(df)
+            if (s[args.scorer] > bs[args.scorer]):
+                bm, bl, bs = (m, l, s)
+        return (bm, bl, bs)
+
     # PCA + K-means
     # what else?
 
-    return K_means(df)
+    return best_K_means(df)
 
 def visualize(results, videos_df, features_df):
     cmap = cm.get_cmap('Spectral') # Colour map (there are many others)
