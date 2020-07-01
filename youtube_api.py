@@ -207,7 +207,43 @@ def visualize(results, videos_df, features_df, dim_reduction='pca'):
 
         n = results['silhouette_score'].idxmax()
         row = results.loc[n]
-        points_df.plot(kind='scatter', x=0, y=1, c=row['labels'], title=n, cmap=cmap)
+
+        fig,ax = plt.subplots()
+        c = row['labels']
+        sc = plt.scatter(points_df.loc[:,0], points_df.loc[:,1], c=c, cmap=cmap)
+        #points_df.plot(kind='scatter', x=0, y=1, c=row['labels'], title=n, cmap=cmap)
+        annot = ax.annotate("", xy=(0,0), xytext=(20,20),textcoords="offset points",
+                            bbox=dict(boxstyle="round", fc="w"),
+                            arrowprops=dict(arrowstyle="->"))
+        annot.set_visible(False)
+        names = videos_df['title'].reset_index(drop=True)
+        norm = plt.Normalize(1,4)
+        #pos = points_df.min()
+
+        def get_text(ind):
+            return "\n".join([names[n] for n in ind["ind"]])
+
+        def update_annot(ind, text):
+            pos = sc.get_offsets()[ind["ind"][0]]
+            annot.xy = pos
+            annot.set_text(text)
+            annot.get_bbox_patch().set_facecolor(cmap(norm(c[ind["ind"][0]])))
+            annot.get_bbox_patch().set_alpha(0.4)
+
+        def hover(event):
+            vis = annot.get_visible()
+            if event.inaxes == ax:
+                cont, ind = sc.contains(event)
+                text = get_text(ind)
+                if cont:
+                    update_annot(ind, text)
+                    annot.set_visible(True)
+                    fig.canvas.draw_idle()
+                elif vis:
+                    annot.set_visible(False)
+                    fig.canvas.draw_idle()
+
+        fig.canvas.mpl_connect("motion_notify_event", hover)
 
     plt.show()
 
