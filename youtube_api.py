@@ -191,10 +191,11 @@ def visualize(results, videos_df, features_df):
     results.plot(subplots=True,kind='line',y=results.columns.difference(['n','model','labels']))
 
     if (args.display_transform):
+        n_components = min(args.display, len(features_df.columns))
         if (args.display_transform == 'pca'):
-            transformer = PCA(args.display)
+            transformer = PCA(n_components)
         elif (args.display_transform == 'mca'):
-            transformer = FactorAnalysis(args.display)
+            transformer = FactorAnalysis(n_components)
         points = transformer.fit_transform(features_df)
         points_df = pd.DataFrame(points)
 
@@ -205,10 +206,10 @@ def visualize(results, videos_df, features_df):
         x_vals = points_df.loc[:,0]
         y_vals = points_df.loc[:,1]
 
-        if (args.display == 2):
+        if (n_components == 2):
             fig,ax = plt.subplots()
             sc = plt.scatter(x_vals, y_vals, c=c, cmap=cmap)
-        elif (args.display == 3):
+        elif (n_components == 3):
             z_vals = points_df.loc[:,2]
             fig = plt.figure()
             ax = fig.add_subplot(111, projection='3d')
