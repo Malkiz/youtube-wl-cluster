@@ -121,8 +121,8 @@ def get_features_df(videos_df):
         print('> added {} columns'.format(len(text_df.columns)))
         all_dfs.append(text_df)
 
-    if (args.categorical):
-        print('using categorical data')
+    if (args.categorical == 1):
+        print('using categorical data - Gower')
         categorical_df = pd.DataFrame(gower.gower_matrix(videos_df.loc[:, category_columns], cat_features = [True for v in category_columns])).set_index(videos_df.index)
         all_dfs.append(categorical_df)
 
@@ -138,9 +138,14 @@ def get_features_df(videos_df):
         print('using array data')
         dummies_arr = map(lambda col: get_array_dummies(videos_df, col), array_columns)
         dummies_df1 = pd.concat(dummies_arr, axis=1, sort=False)
-        #dummies_df2 = pd.concat(map(lambda col: pd.get_dummies(videos_df[col].fillna(''), dtype=int), category_columns), axis=1, sort=False)
         print('> added {} columns'.format(len(dummies_df1.columns)))
         all_dfs.append(dummies_df1)
+
+    if (args.categorical == 2):
+        print('using categorical data - dummies')
+        dummies_df2 = pd.concat(map(lambda col: pd.get_dummies(videos_df[col].fillna(''), dtype=int), category_columns), axis=1, sort=False)
+        print('> added {} columns'.format(len(dummies_df2.columns)))
+        all_dfs.append(dummies_df2)
        
     features_df = pd.concat(all_dfs, axis=1, sort=False)
     print('features is {} dimentions'.format(len(features_df.columns)))
@@ -296,7 +301,7 @@ if __name__ == "__main__":
     parser.add_argument('--file', help='the filename containing the playlist video ids', type=str, default='WL.csv')
     parser.add_argument('--array',help='use array data columns', action='store_true', default=False)
     parser.add_argument('--numerical',help='use numerical data columns', action='store_true', default=False)
-    parser.add_argument('--categorical',help='use categorical data columns', action='store_true', default=False)
+    parser.add_argument('--categorical',help='use categorical data columns', type=int, choices=[0,1,2], default=0)
     parser.add_argument('--text',help='use text data columns', action='store_true', default=False)
     parser.add_argument('--pca',help='compress the features dataframe using pca', action='store_true', default=False)
     parser.add_argument('--pca_variance',help='if using pca, how much variance to retain',type=float,default=0.95)
