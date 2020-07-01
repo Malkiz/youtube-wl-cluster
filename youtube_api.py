@@ -304,5 +304,6 @@ if __name__ == "__main__":
     if args.version:
         print('1.0.0')
     else:
+        print(args)
         main()
 
