@@ -124,6 +124,7 @@ def get_features_df(videos_df):
     if (args.categorical == 1):
         print('using categorical data - Gower')
         categorical_df = pd.DataFrame(gower.gower_matrix(videos_df.loc[:, category_columns], cat_features = [True for v in category_columns])).set_index(videos_df.index)
+        print('> added {} columns'.format(len(categorical_df.columns)))
         all_dfs.append(categorical_df)
 
     if (args.numerical):
