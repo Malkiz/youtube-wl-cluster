@@ -1,3 +1,4 @@
+import argparse
 import json
 from googleapiclient.discovery import build
 import pandas as pd
@@ -71,7 +72,7 @@ def get_channels_data(videos_list):
     ).execute()['items'] for i in range(0, len(channel_chunks))])
 
 def get_videos_df():
-    wl = pd.read_csv('WL.csv')
+    wl = pd.read_csv(args.file)
     wl_chunks = chunk_df(wl, 50)
     videos_list = cache_json("videos_data.json", lambda: get_videos_data(wl_chunks))
     channels_list = cache_json("channels_data.json", lambda: get_channels_data(videos_list))
@@ -94,7 +95,7 @@ def get_videos_df():
     videos_df = videos_df.join(channels_df.set_index('id'), on='channelId', rsuffix='_channel')
     return videos_df.set_index('id')
 
-def get_features_df(videos_df, use_text=True, use_categorical=True, use_numerical=True, use_array=True, use_pca=False):
+def get_features_df(videos_df):
     # TODO:
     #   - mean & normalize numeric columns
     #       NOTE: K-means normalized the data automatically. But maybe it's needed for other models.
@@ -111,7 +112,7 @@ def get_features_df(videos_df, use_text=True, use_categorical=True, use_numerica
 
     all_dfs = []
 
-    if (use_text):
+    if (args.text):
         print('using text data')
         vectorizer = CountVectorizer()
         corpus = videos_df.loc[:, text_columns].values.sum(axis=1)
@@ -120,12 +121,12 @@ def get_features_df(videos_df, use_text=True, use_categorical=True, use_numerica
         print('> added {} columns'.format(len(text_df.columns)))
         all_dfs.append(text_df)
 
-    if (use_categorical):
+    if (args.categorical):
         print('using categorical data')
         categorical_df = pd.DataFrame(gower.gower_matrix(videos_df.loc[:, category_columns], cat_features = [True for v in category_columns])).set_index(videos_df.index)
         all_dfs.append(categorical_df)
 
-    if (use_numerical):
+    if (args.numerical):
         print('using numerical data')
         numerical_df = pd.DataFrame(preprocessing.normalize(videos_df.loc[:, numeric_columns].fillna(0))).set_index(videos_df.index)
         all_dfs.append(numerical_df)
@@ -133,7 +134,7 @@ def get_features_df(videos_df, use_text=True, use_categorical=True, use_numerica
     def get_array_dummies(df, column):
         return pd.get_dummies(df[column].fillna('').apply(pd.Series).stack(), dtype=int).sum(level=0)
 
-    if (use_array):
+    if (args.array):
         print('using array data')
         dummies_arr = map(lambda col: get_array_dummies(videos_df, col), array_columns)
         dummies_df1 = pd.concat(dummies_arr, axis=1, sort=False)
@@ -145,15 +146,14 @@ def get_features_df(videos_df, use_text=True, use_categorical=True, use_numerica
     print('features is {} dimentions'.format(len(features_df.columns)))
 
     # PCA compression
-    if (use_pca):
+    if (args.pca):
         print('PCA compression...')
         pca = PCA()
         pca.fit(features_df)
         s = np.cumsum(pca.explained_variance_ratio_)
-        variance = 0.95
-        n = min(len(s[s < variance]) + 1, len(s))
+        n = min(len(s[s < args.variance]) + 1, len(s))
 
-        print('compressing into {} dimentions for keeping {} variance'.format(n, variance))
+        print('compressing into {} dimentions for keeping {} variance'.format(n, args.variance))
 
         pca = PCA(n_components=n)
 
@@ -185,16 +185,16 @@ def clustering(df, n=3):
 
     return K_means(df)
 
-def visualize(results, videos_df, features_df, dim_reduction='pca', n_components=3):
+def visualize(results, videos_df, features_df):
     cmap = cm.get_cmap('Spectral') # Colour map (there are many others)
 
     results.plot(subplots=True,kind='line',y=results.columns.difference(['n','model','labels']))
 
-    if (dim_reduction):
-        if (dim_reduction == 'pca'):
-            transformer = PCA(n_components)
-        elif (dim_reduction == 'mca'):
-            transformer = FactorAnalysis(n_components)
+    if (args.display_transform):
+        if (args.display_transform == 'pca'):
+            transformer = PCA(args.display)
+        elif (args.display_transform == 'mca'):
+            transformer = FactorAnalysis(args.display)
         points = transformer.fit_transform(features_df)
         points_df = pd.DataFrame(points)
 
@@ -205,10 +205,10 @@ def visualize(results, videos_df, features_df, dim_reduction='pca', n_components
         x_vals = points_df.loc[:,0]
         y_vals = points_df.loc[:,1]
 
-        if (n_components == 2):
+        if (args.display == 2):
             fig,ax = plt.subplots()
             sc = plt.scatter(x_vals, y_vals, c=c, cmap=cmap)
-        elif (n_components == 3):
+        elif (args.display == 3):
             z_vals = points_df.loc[:,2]
             fig = plt.figure()
             ax = fig.add_subplot(111, projection='3d')
@@ -258,7 +258,7 @@ def main():
 
     #print(features_df.loc[features_df.isnull().any(axis=1)])
 
-    clusters = range(3,11)
+    clusters = range(args.min_clusters,args.max_clusters+1)
     scores_list = []
     models = []
     labels_list = []
@@ -283,4 +283,24 @@ def main():
     visualize(results, videos_df, features_df)
 
 if __name__ == "__main__":
-    main()
+    parser = argparse.ArgumentParser(description='cluster videos from a youtube playlist based on the available data')
+    parser.add_argument('-v','--version',help='display version', action='store_true')
+    parser.add_argument('--file', help='the filename containing the playlist video ids', type=str, default='WL.csv')
+    parser.add_argument('--array',help='use array data columns', action='store_true', default=True)
+    parser.add_argument('--numerical',help='use numerical data columns', action='store_true', default=False)
+    parser.add_argument('--categorical',help='use categorical data columns', action='store_true', default=False)
+    parser.add_argument('--text',help='use text data columns', action='store_true', default=False)
+    parser.add_argument('--pca',help='compress the features dataframe using pca', action='store_true', default=False)
+    parser.add_argument('--pca-variance',help='if using pca, how much variance to retain',type=float,default=0.95)
+    parser.add_argument('--display',help='how to display the scatter plot: 2d/3d', choices=[2,3], type=int, default=3)
+    parser.add_argument('--display_transform',help='how to transform the data before displaying it', choices=['', 'pca', 'mca'], type=str, default='pca')
+    parser.add_argument('--min_clusters',help='minimum number of clusters',type=int,default=3)
+    parser.add_argument('--max_clusters',help='maximum number of clusters',type=int,default=10)
+ 
+    args = parser.parse_args()
+
+    if args.version:
+        print('1.0.0')
+    else:
+        main()
+
