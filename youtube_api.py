@@ -172,12 +172,15 @@ def clustering(df, n=3):
     def K_means(df):
         model = KMeans(n_clusters=n).fit(df)
         labels = model.labels_
-        scores = {
-            "inertia": model.inertia_,
-            "silhouette_score": metrics.silhouette_score(df, labels, metric='euclidean'),
-            "calinski_harabasz_score": metrics.calinski_harabasz_score(df, labels),
-            "davies_bouldin_score": metrics.davies_bouldin_score(df, labels)
-        }
+        scores = {}
+        if 'inertia' in args.scorers:
+            scores["inertia"] = model.inertia_
+        if 'silhouette_score' in args.scorers:
+            scores["silhouette_score"] = metrics.silhouette_score(df, labels, metric='euclidean')
+        if 'calinski_harabasz_score' in args.scorers:
+            scores["calinski_harabasz_score"] = metrics.calinski_harabasz_score(df, labels)
+        if 'davies_bouldin_score' in args.scorers:
+            scores["davies_bouldin_score"] = metrics.davies_bouldin_score(df, labels)
         return (model, labels, scores)
 
     # PCA + K-means
@@ -298,8 +301,12 @@ if __name__ == "__main__":
     parser.add_argument('--min_clusters',help='minimum number of clusters',type=int,default=3)
     parser.add_argument('--max_clusters',help='maximum number of clusters',type=int,default=10)
     parser.add_argument('--scorer',help='the scorer to use for choosing the best cluster',type=str,default='silhouette_score',choices=['silhouette_score','inertia','calinski_harabasz_score','davies_bouldin_score'])
+    parser.add_argument('--scorers',help='which scorers to calculate',type=str,default='silhouette_score,inertia,calinski_harabasz_score,davies_bouldin_score')
  
     args = parser.parse_args()
+    args.scorers = args.scorers.split(',')
+    if args.scorer not in args.scorers:
+        raise ValueError('the selected scorer {} is not present in the scorers list {}'.format(args.scorer, args.scorers))
 
     if args.version:
         print('1.0.0')
