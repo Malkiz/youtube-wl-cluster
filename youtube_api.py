@@ -263,6 +263,7 @@ def main():
     #print(features_df.loc[features_df.isnull().any(axis=1)])
 
     clusters = range(args.min_clusters,args.max_clusters+1)
+    print('clustering over {}'.format(clusters))
     scores_list = []
     models = []
     labels_list = []
