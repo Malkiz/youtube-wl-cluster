@@ -264,14 +264,14 @@ def join_features(curr_res, all_dfs_dict, data=None):
 def get_exp_col_names(df):
     desc = df.describe()
     std = desc.loc['std']
+    std_diff = desc.loc['max'] - std
     for c in ['min', '25%', '50%', '75%']: 
         #print('iteration {}'.format(c))
-        std_diff = desc.loc['max'] - std
         col_names = desc.columns[(desc.loc[c] >= std_diff) & (0 < std_diff)].values
         if len(col_names) > 0:
             return ( col_names, c )
     #print(desc)
-    return []
+    return ( [], 'max' )
 
 def explain(result_row, explain_df):
     print('explain')
