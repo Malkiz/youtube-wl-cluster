@@ -342,18 +342,7 @@ def main():
     features_df = join_features(pd.DataFrame(index=videos_df.index), all_dfs_dict, unique_data)
     visualize(results, videos_df, features_df)
 
-if __name__ == "__main__":
-    parser = argparse.ArgumentParser(description='cluster videos from a youtube playlist based on the available data')
-    parser.add_argument('-v','--version',help='display version', action='store_true')
-    parser.add_argument('--file', help='the filename containing the playlist video ids', type=str, default='WL.csv')
-    parser.add_argument('--display',help='how to display the scatter plot: 2d/3d', choices=[2,3], type=int, default=3)
-    parser.add_argument('--display_transform',help='how to transform the data before displaying it', choices=['', 'pca', 'mca'], type=str, default='pca')
-    parser.add_argument('--min_clusters',help='minimum number of clusters',type=int,default=5)
-    parser.add_argument('--max_clusters',help='maximum number of clusters',type=int,default=15)
-    parser.add_argument('--scorer',help='the scorer to use for choosing the best cluster',type=str,default='silhouette_score',choices=['silhouette_score','inertia','calinski_harabasz_score','davies_bouldin_score'])
-    parser.add_argument('--scorers',help='which scorers to calculate',type=str,default='silhouette_score')
-    parser.add_argument('--stages',help='stages of clustering',type=str,default='best_K_means@10:array,categorical_1>pca,0.99')
- 
+def parse_args():
     args = parser.parse_args()
     args.scorers = args.scorers.split(',')
     if args.scorer not in args.scorers:
@@ -373,6 +362,22 @@ if __name__ == "__main__":
             stage['compress'] = {'method':c[0], 'variance':float(c[1])}
         stages.append(stage)
     args.stages = stages
+
+    return args
+
+if __name__ == "__main__":
+    parser = argparse.ArgumentParser(description='cluster videos from a youtube playlist based on the available data')
+    parser.add_argument('-v','--version',help='display version', action='store_true')
+    parser.add_argument('--file', help='the filename containing the playlist video ids', type=str, default='WL.csv')
+    parser.add_argument('--display',help='how to display the scatter plot: 2d/3d', choices=[2,3], type=int, default=3)
+    parser.add_argument('--display_transform',help='how to transform the data before displaying it', choices=['', 'pca', 'mca'], type=str, default='pca')
+    parser.add_argument('--min_clusters',help='minimum number of clusters',type=int,default=5)
+    parser.add_argument('--max_clusters',help='maximum number of clusters',type=int,default=15)
+    parser.add_argument('--scorer',help='the scorer to use for choosing the best cluster',type=str,default='silhouette_score',choices=['silhouette_score','inertia','calinski_harabasz_score','davies_bouldin_score'])
+    parser.add_argument('--scorers',help='which scorers to calculate',type=str,default='silhouette_score')
+    parser.add_argument('--stages',help='stages of clustering',type=str,default='best_K_means@10:array,categorical_1>pca,0.99')
+ 
+    args = parse_args()
 
     if args.version:
         print('1.0.0')
