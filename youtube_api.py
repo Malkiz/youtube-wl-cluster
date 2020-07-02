@@ -264,37 +264,30 @@ def join_features(curr_res, all_dfs_dict, data=None):
 def get_exp_col_names(df):
     desc = df.describe()
     std = desc.loc['std']
-    for i in range(0,20): 
-        print('iteration {}'.format(i))
+    for c in ['min', '25%', '50%', '75%']: 
+        #print('iteration {}'.format(c))
         std_diff = desc.loc['max'] - std
-        col_names = desc.columns[(desc.loc['min'] >= std_diff) & (0 < std_diff)].values
+        col_names = desc.columns[(desc.loc[c] >= std_diff) & (0 < std_diff)].values
         if len(col_names) > 0:
-            return col_names
-        std *= 2
-    print(desc)
+            return ( col_names, c )
+    #print(desc)
     return []
 
 def explain(result_row, videos_df, explain_df):
     print('explain')
     print(result_row)
-    #print(videos_df)
-    print(explain_df)
-    #print(explain_df.describe())
-    #print(explain_df.sum())
-    #explain_df.hist()
     labels = result_row['labels']
     n = result_row['n']
     for i in range(0,n):
         group = explain_df[labels == i]
         print('group {}'.format(i))
-        col_names = get_exp_col_names(group)
-        #print(desc)
-        #print(cols)
+        col_names, c = get_exp_col_names(group)
+        print(c)
         print(col_names)
-        if (len(col_names) > 0):
-            cols = group.loc[:, col_names]
+        #if (len(col_names) > 0):
+            #cols = group.loc[:, col_names]
             #print(cols)
-            print(cols.describe())
+            #print(cols.describe())
 
 def visualize(results, videos_df, features_df, explain_df):
     results.plot(subplots=True,kind='line',y=results.columns.difference(['n','model','labels']))
