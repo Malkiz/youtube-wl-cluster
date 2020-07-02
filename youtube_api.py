@@ -286,12 +286,12 @@ def explain(result_row, explain_df):
         print(c)
         print(col_names)
         if (len(col_names) > 0):
-            names.append(','.join(col_names))
+            names.append('{}|{}'.format(i, ','.join(col_names[:10])))
             #cols = group.loc[:, col_names]
             #print(cols)
             #print(cols.describe())
         else:
-            names.append('unknown {}'.format(i))
+            names.append('{}|unknown'.format(i))
     return names
 
 def visualize(results, videos_df, features_df, explain_df):
