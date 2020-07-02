@@ -273,21 +273,26 @@ def get_exp_col_names(df):
     #print(desc)
     return []
 
-def explain(result_row, videos_df, explain_df):
+def explain(result_row, explain_df):
     print('explain')
     print(result_row)
     labels = result_row['labels']
     n = result_row['n']
+    names = []
     for i in range(0,n):
         group = explain_df[labels == i]
         print('group {}'.format(i), end=' ')
         col_names, c = get_exp_col_names(group)
         print(c)
         print(col_names)
-        #if (len(col_names) > 0):
+        if (len(col_names) > 0):
+            names.append(','.join(col_names))
             #cols = group.loc[:, col_names]
             #print(cols)
             #print(cols.describe())
+        else:
+            names.append('unknown {}'.format(i))
+    return names
 
 def visualize(results, videos_df, features_df, explain_df):
     results.plot(subplots=True,kind='line',y=results.columns.difference(['n','model','labels']))
@@ -297,7 +302,7 @@ def visualize(results, videos_df, features_df, explain_df):
         row = results.loc[n]
         c = row['labels']
 
-        explain(row, videos_df, explain_df)
+        group_names = explain(row, explain_df)
 
         n_components = min(args.display, len(features_df.columns))
         if (args.display_transform == 'pca'):
@@ -323,6 +328,9 @@ def visualize(results, videos_df, features_df, explain_df):
             ax = fig.add_subplot(111, projection='3d')
             sc = ax.scatter(x_vals, y_vals, z_vals, c=c, cmap=cmap)
         ax.set_title(title)
+
+        handles, _ = sc.legend_elements()
+        ax.legend(handles, group_names, title="Classes")
 
         annot = ax.annotate("", xy=(0,0), xytext=(20,20),textcoords="offset points",
                             bbox=dict(boxstyle="round", fc="w"),
