@@ -236,14 +236,49 @@ def join_features(curr_res, all_dfs_dict, data):
         print('features is {} dimentions'.format(len(features_df.columns)))
         return features_df
 
-def visualize(results, videos_df, features_df):
-    cmap = cm.get_cmap('Spectral') # Colour map (there are many others)
+def get_exp_col_names(df):
+    desc = df.describe()
+    std = desc.loc['std']
+    for i in range(0,20): 
+        print('iteration {}'.format(i))
+        std_diff = desc.loc['max'] - std
+        col_names = desc.columns[(desc.loc['min'] >= std_diff) & (0 < std_diff)].values
+        if len(col_names) > 0:
+            return col_names
+        std *= 2
+    return []
 
+def explain(result_row, videos_df, features_df):
+    print('explain')
+    print(result_row)
+    #print(videos_df)
+    #print(features_df)
+    #print(features_df.describe())
+    #print(features_df.sum())
+    #features_df.hist()
+    labels = result_row['labels']
+    n = result_row['n']
+    for i in range(0,n):
+        group = features_df[labels == i]
+        print('group {}'.format(i))
+        col_names = get_exp_col_names(group)
+        #print(desc)
+        #print(cols)
+        print(col_names)
+        if (len(col_names) > 0):
+            cols = group.loc[:, col_names]
+            #print(cols)
+            print(cols.describe())
+
+def visualize(results, videos_df, features_df):
     results.plot(subplots=True,kind='line',y=results.columns.difference(['n','model','labels']))
 
     if (args.display_transform):
         n = results[args.scorer].idxmax()
         row = results.loc[n]
+        c = row['labels']
+
+        explain(row, videos_df, features_df)
 
         n_components = min(args.display, len(features_df.columns))
         if (args.display_transform == 'pca'):
@@ -252,10 +287,10 @@ def visualize(results, videos_df, features_df):
             transformer = FactorAnalysis(n_components)
         points = transformer.fit_transform(features_df)
         points_df = pd.DataFrame(points)
+        cmap = cm.get_cmap('Spectral') # Colour map (there are many others)
 
         title = 'best clustering according to {}: {} groups, score {}'.format(args.scorer, n, results.at[n, args.scorer])
         print(title)
-        c = row['labels']
 
         x_vals = points_df.loc[:,0]
         y_vals = points_df.loc[:,1]
