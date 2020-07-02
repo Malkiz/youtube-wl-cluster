@@ -4,3 +4,4 @@ node_modules/
 account.js
 *.csv*
 apiKey.json
+video_categories.json
