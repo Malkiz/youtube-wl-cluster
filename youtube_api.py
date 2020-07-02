@@ -123,7 +123,7 @@ def get_features_df(videos_df, data_sets):
     category_columns = ['channelTitle','category']
 
     def text():
-        print('using text data')
+        print('using text data', end=' ')
         vectorizer = CountVectorizer()
         corpus = videos_df.loc[:, text_columns].values.sum(axis=1)
         text = vectorizer.fit_transform(corpus).toarray()
@@ -132,7 +132,7 @@ def get_features_df(videos_df, data_sets):
         return text_df
 
     def categorical_1():
-        print('using categorical data - Gower')
+        print('using categorical data - Gower', end=' ')
         categorical_df = pd.DataFrame(gower.gower_matrix(videos_df.loc[:, category_columns], cat_features = [True for v in category_columns])).set_index(videos_df.index)
         print('> added {} columns'.format(len(categorical_df.columns)))
         return categorical_df
@@ -146,14 +146,14 @@ def get_features_df(videos_df, data_sets):
         return pd.get_dummies(df[column].fillna('').apply(pd.Series).stack(), dtype=int).sum(level=0)
 
     def array():
-        print('using array data')
+        print('using array data', end=' ')
         dummies_arr = map(lambda col: get_array_dummies(videos_df, col), array_columns)
         dummies_df1 = pd.concat(dummies_arr, axis=1, sort=False)
         print('> added {} columns'.format(len(dummies_df1.columns)))
         return dummies_df1
 
     def categorical_2():
-        print('using categorical data - dummies')
+        print('using categorical data - dummies', end=' ')
         dummies_df2 = pd.concat(map(lambda col: pd.get_dummies(videos_df[col].fillna(''), dtype=int), category_columns), axis=1, sort=False)
         print('> added {} columns'.format(len(dummies_df2.columns)))
         return dummies_df2
@@ -183,7 +183,7 @@ def get_features_df(videos_df, data_sets):
 def compress(features_df, options):
     # PCA compression
     if (options['method'] == 'pca'):
-        print('PCA compression...')
+        print('PCA compression...', end=' ')
         pca = PCA()
         pca.fit(features_df)
         s = np.cumsum(pca.explained_variance_ratio_)
@@ -280,7 +280,7 @@ def explain(result_row, videos_df, explain_df):
     n = result_row['n']
     for i in range(0,n):
         group = explain_df[labels == i]
-        print('group {}'.format(i))
+        print('group {}'.format(i), end=' ')
         col_names, c = get_exp_col_names(group)
         print(c)
         print(col_names)
@@ -376,7 +376,7 @@ def main():
     models = []
     labels_list = []
     for n in clusters:
-        print('cluster into {} groups...'.format(n))
+        print('cluster into {} groups...'.format(n), end=' ')
         model, labels, scores = clustering(all_dfs_dict,n,videos_df.index, init)
         print(scores)
         models.append(model)
