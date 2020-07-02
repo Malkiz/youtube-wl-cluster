@@ -2,8 +2,5 @@ client_secret.json
 py_venv/
 node_modules/
 account.js
-WL.csv
+*.csv*
 apiKey.json
-videos_data.json
-channels_data.json
-out.csv

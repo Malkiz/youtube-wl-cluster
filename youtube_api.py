@@ -75,8 +75,8 @@ def get_channels_data(videos_list):
 def get_videos_df():
     wl = pd.read_csv(args.file)
     wl_chunks = chunk_df(wl, 50)
-    videos_list = cache_json("videos_data.json", lambda: get_videos_data(wl_chunks))
-    channels_list = cache_json("channels_data.json", lambda: get_channels_data(videos_list))
+    videos_list = cache_json(args.file + "_videos_data.json", lambda: get_videos_data(wl_chunks))
+    channels_list = cache_json(args.file + "_channels_data.json", lambda: get_channels_data(videos_list))
 
     videos_df = pd.DataFrame(videos_list, columns=['id'])
     videos_snippet = pd.DataFrame([v['snippet'] for v in videos_list], columns=['channelId','title','description','channelTitle','tags','categoryId'])
