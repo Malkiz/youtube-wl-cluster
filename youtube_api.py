@@ -239,20 +239,20 @@ def join_features(curr_res, all_dfs_dict, data):
 def get_exp_col_names(df):
     desc = df.describe()
     std = desc.loc['std']
-    for i in range(0,20): 
-        print('iteration {}'.format(i))
-        std_diff = desc.loc['max'] - std
-        col_names = desc.columns[(desc.loc['min'] >= std_diff) & (0 < std_diff)].values
-        if len(col_names) > 0:
-            return col_names
-        std *= 2
-    return []
+    #for i in range(0,20): 
+    #    print('iteration {}'.format(i))
+    std_diff = desc.loc['max'] - std
+    col_names = desc.columns[(desc.loc['min'] >= std_diff) & (0 < std_diff)].values
+    #if len(col_names) > 0:
+    return col_names
+    #    std *= 2
+    #return []
 
 def explain(result_row, videos_df, features_df):
     print('explain')
     print(result_row)
     #print(videos_df)
-    #print(features_df)
+    print(features_df)
     #print(features_df.describe())
     #print(features_df.sum())
     #features_df.hist()
