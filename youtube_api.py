@@ -64,6 +64,12 @@ def get_videos_data(wl_chunks):
         id=','.join(wl_chunks[i]['id'])
     ).execute()['items'] for i in range(0, len(wl_chunks))])
 
+def get_video_categories():
+    return youtube().videoCategories().list(
+        part="snippet",
+        regionCode="US"
+    ).execute()['items'] 
+
 def get_channels_data(videos_list):
     channel_ids = set(map(lambda item: item['snippet']['channelId'], videos_list))
     channel_chunks = chunk_df(pd.DataFrame(list(channel_ids)), 50)
@@ -77,9 +83,14 @@ def get_videos_df():
     wl_chunks = chunk_df(wl, 50)
     videos_list = cache_json(args.file + "_videos_data.json", lambda: get_videos_data(wl_chunks))
     channels_list = cache_json(args.file + "_channels_data.json", lambda: get_channels_data(videos_list))
+    video_categories_list = cache_json('video_categories.json', get_video_categories)
+
+    categories_dict = {x['id']: x['snippet']['title'] for x in video_categories_list }
 
     videos_df = pd.DataFrame(videos_list, columns=['id'])
     videos_snippet = pd.DataFrame([v['snippet'] for v in videos_list], columns=['channelId','title','description','channelTitle','tags','categoryId'])
+    videos_snippet['category'] = videos_snippet['categoryId'].map(categories_dict)
+    videos_snippet = videos_snippet.drop(columns=['categoryId'])
     videos_contentDetails = pd.DataFrame([v['contentDetails'] for v in videos_list], columns=['duration'])
     videos_statistics = pd.DataFrame([v['statistics'] for v in videos_list])
     videos_topicDetails = pd.DataFrame([v['topicDetails'] if 'topicDetails' in v else {} for v in videos_list])
@@ -109,7 +120,7 @@ def get_features_df(videos_df, data_sets):
     numeric_columns = ['viewCount','likeCount','dislikeCount','favoriteCount','commentCount','viewCount_channel','commentCount_channel','subscriberCount','videoCount']
     text_columns = ['title','description','description_channel']
     array_columns = ['tags','relevantTopicIds','topicCategories','topicIds']
-    category_columns = ['channelId','categoryId']
+    category_columns = ['channelTitle','category']
 
     def text():
         print('using text data')
@@ -154,8 +165,18 @@ def get_features_df(videos_df, data_sets):
         'array':array,
         'categorical_2':categorical_2
     }
+    
+    explainers = {
+        'text':'text',
+        'categorical_1':'categorical_2',
+        'array':'array',
+        'categorical_2':'categorical_2'
+    }
     all_dfs_dict = {n: data_getters[n]() for n in data_sets }
-    return all_dfs_dict
+
+    exp_data_sets = set( [explainers[n] for n in data_sets] )
+    exp_dfs_dict = {n: all_dfs_dict[n] if n in all_dfs_dict else data_getters[n]() for n in exp_data_sets }
+    return ( all_dfs_dict, exp_dfs_dict )
 
 def compress(features_df, options):
     # PCA compression
@@ -231,35 +252,38 @@ def clustering(all_dfs_dict, n, index, init=pd.DataFrame()):
 
     return m, l, s
 
-def join_features(curr_res, all_dfs_dict, data):
-        features_df = pd.concat([curr_res]+[all_dfs_dict[d] for d in data], axis=1, sort=False)
-        print('features is {} dimentions'.format(len(features_df.columns)))
-        return features_df
+def join_features(curr_res, all_dfs_dict, data=None):
+    if data == None:
+        data = set(all_dfs_dict.keys())
+    features_df = pd.concat([curr_res]+[all_dfs_dict[d] for d in data], axis=1, sort=False)
+    print('features is {} dimentions'.format(len(features_df.columns)))
+    return features_df
 
 def get_exp_col_names(df):
     desc = df.describe()
     std = desc.loc['std']
-    #for i in range(0,20): 
-    #    print('iteration {}'.format(i))
-    std_diff = desc.loc['max'] - std
-    col_names = desc.columns[(desc.loc['min'] >= std_diff) & (0 < std_diff)].values
-    #if len(col_names) > 0:
-    return col_names
-    #    std *= 2
-    #return []
+    for i in range(0,20): 
+        print('iteration {}'.format(i))
+        std_diff = desc.loc['max'] - std
+        col_names = desc.columns[(desc.loc['min'] >= std_diff) & (0 < std_diff)].values
+        if len(col_names) > 0:
+            return col_names
+        std *= 2
+    print(desc)
+    return []
 
-def explain(result_row, videos_df, features_df):
+def explain(result_row, videos_df, explain_df):
     print('explain')
     print(result_row)
     #print(videos_df)
-    print(features_df)
-    #print(features_df.describe())
-    #print(features_df.sum())
-    #features_df.hist()
+    print(explain_df)
+    #print(explain_df.describe())
+    #print(explain_df.sum())
+    #explain_df.hist()
     labels = result_row['labels']
     n = result_row['n']
     for i in range(0,n):
-        group = features_df[labels == i]
+        group = explain_df[labels == i]
         print('group {}'.format(i))
         col_names = get_exp_col_names(group)
         #print(desc)
@@ -270,7 +294,7 @@ def explain(result_row, videos_df, features_df):
             #print(cols)
             print(cols.describe())
 
-def visualize(results, videos_df, features_df):
+def visualize(results, videos_df, features_df, explain_df):
     results.plot(subplots=True,kind='line',y=results.columns.difference(['n','model','labels']))
 
     if (args.display_transform):
@@ -278,7 +302,7 @@ def visualize(results, videos_df, features_df):
         row = results.loc[n]
         c = row['labels']
 
-        explain(row, videos_df, features_df)
+        explain(row, videos_df, explain_df)
 
         n_components = min(args.display, len(features_df.columns))
         if (args.display_transform == 'pca'):
@@ -343,7 +367,7 @@ def main():
     videos_df = get_videos_df()
 
     unique_data = set(itertools.chain.from_iterable([s['data'] for s in args.stages]))
-    all_dfs_dict = get_features_df(videos_df, unique_data)
+    all_dfs_dict, exp_dfs_dict = get_features_df(videos_df, unique_data)
 
     stage0 = args.stages[0]
     init = join_features(pd.DataFrame(index=videos_df.index), all_dfs_dict, stage0['data'])
@@ -374,8 +398,9 @@ def main():
     results['n'] = clusters
     results.set_index('n')
 
-    features_df = join_features(pd.DataFrame(index=videos_df.index), all_dfs_dict, unique_data)
-    visualize(results, videos_df, features_df)
+    features_df = join_features(pd.DataFrame(index=videos_df.index), all_dfs_dict)
+    explain_df = join_features(pd.DataFrame(index=videos_df.index), exp_dfs_dict)
+    visualize(results, videos_df, features_df, explain_df)
 
 def parse_args():
     args = parser.parse_args()
