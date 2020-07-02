@@ -167,14 +167,16 @@ def get_features_df(videos_df, data_sets):
     }
     
     explainers = {
-        'text':'text',
         'categorical_1':'categorical_2',
         'array':'array',
         'categorical_2':'categorical_2'
+        # add explainers for text
+        # add gower for array
     }
     all_dfs_dict = {n: data_getters[n]() for n in data_sets }
 
-    exp_data_sets = set( [explainers[n] for n in data_sets] )
+    exp_data_sets = set( [explainers[n] if n in explainers else None for n in data_sets] )
+    exp_data_sets.discard(None)
     exp_dfs_dict = {n: all_dfs_dict[n] if n in all_dfs_dict else data_getters[n]() for n in exp_data_sets }
     return ( all_dfs_dict, exp_dfs_dict )
 
