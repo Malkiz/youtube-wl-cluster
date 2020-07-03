@@ -262,6 +262,9 @@ def join_features(curr_res, all_dfs_dict, data=None):
     return features_df
 
 def get_exp_col_names(df):
+    if len( df.columns ) == 0:
+        return ( [], 'empty' )
+
     desc = df.describe()
     std = desc.loc['std']
     std_diff = desc.loc['max'] - std
@@ -285,13 +288,10 @@ def explain(result_row, explain_df):
         col_names, c = get_exp_col_names(group)
         print(c)
         print(col_names)
-        if (len(col_names) > 0):
-            names.append('{}|{}'.format(i, ','.join(col_names[:10])))
-            #cols = group.loc[:, col_names]
-            #print(cols)
-            #print(cols.describe())
-        else:
-            names.append('{}|unknown'.format(i))
+        names.append('{}|{}'.format(i, ','.join(col_names[:10])) if len(col_names) > 0 else 'unknown')
+        #cols = group.loc[:, col_names]
+        #print(cols)
+        #print(cols.describe())
     return names
 
 def visualize(results, videos_df, features_df, explain_df):
