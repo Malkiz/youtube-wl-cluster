@@ -362,7 +362,14 @@ def visualize(results, videos_df, features_df, explain_df):
                     annot.set_visible(False)
                     fig.canvas.draw_idle()
 
+        def keypress(event):
+            if event.key == 'a':
+                l = ax.get_legend()
+                l.set_visible(not l.get_visible())
+                fig.canvas.draw()
+
         fig.canvas.mpl_connect("motion_notify_event", hover)
+        fig.canvas.mpl_connect("key_press_event", keypress)
 
     plt.show()
 
