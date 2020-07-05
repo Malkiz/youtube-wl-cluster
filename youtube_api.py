@@ -288,7 +288,7 @@ def explain(result_row, explain_df):
         col_names, c = get_exp_col_names(group)
         print(c)
         print(col_names)
-        names.append('{}|{}'.format(i, ','.join(col_names[:10])) if len(col_names) > 0 else 'unknown')
+        names.append('{}|{}|{}'.format(i, c, ','.join(map(str, col_names[:10]))) if len(col_names) > 0 else 'unknown')
         #cols = group.loc[:, col_names]
         #print(cols)
         #print(cols.describe())
