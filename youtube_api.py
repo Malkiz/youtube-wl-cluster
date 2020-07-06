@@ -9,7 +9,6 @@ from sklearn import metrics
 import matplotlib
 matplotlib.use('TkAgg')
 import matplotlib.pyplot as plt
-from gower_dist import gower_matrix
 from sklearn.feature_extraction.text import CountVectorizer
 from sklearn.decomposition import PCA
 import numpy as np
@@ -17,6 +16,9 @@ from sklearn import preprocessing
 from matplotlib import cm
 from sklearn.decomposition import FactorAnalysis
 import itertools
+import sys
+sys.path.insert(1, '../gower/gower')
+from gower_dist import gower_matrix
 
 def chunk_df(df, n=10):
     return [df[i:i+n] for i in range(0,df.shape[0],n)]
