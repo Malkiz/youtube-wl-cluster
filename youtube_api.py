@@ -9,7 +9,7 @@ from sklearn import metrics
 import matplotlib
 matplotlib.use('TkAgg')
 import matplotlib.pyplot as plt
-import gower
+from gower_dist import gower_matrix
 from sklearn.feature_extraction.text import CountVectorizer
 from sklearn.decomposition import PCA
 import numpy as np
@@ -133,7 +133,7 @@ def get_features_df(videos_df, data_sets):
 
     def categorical_1():
         print('using categorical data - Gower', end=' ')
-        categorical_df = pd.DataFrame(gower.gower_matrix(videos_df.loc[:, category_columns], cat_features = [True for v in category_columns])).set_index(videos_df.index)
+        categorical_df = pd.DataFrame(gower_matrix(videos_df.loc[:, category_columns], cat_features = [True for v in category_columns])).set_index(videos_df.index)
         print('> added {} columns'.format(len(categorical_df.columns)))
         return categorical_df
 
