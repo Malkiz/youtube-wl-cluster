@@ -148,9 +148,19 @@ def get_features_df(videos_df, data_sets):
         return pd.get_dummies(df[column].fillna('').apply(pd.Series).stack(), dtype=int).sum(level=0)
 
     def array():
-        print('using array data', end=' ')
         dummies_arr = map(lambda col: get_array_dummies(videos_df, col), array_columns)
         dummies_df1 = pd.concat(dummies_arr, axis=1, sort=False)
+        return dummies_df1
+
+    def array_1():
+        print('using array data', end=' ')
+        dummies_df1 = array()
+        print('> added {} columns'.format(len(dummies_df1.columns)))
+        return dummies_df1
+
+    def array_2():
+        print('using array Gower data', end=' ')
+        dummies_df1 = pd.DataFrame(gower_matrix(array()))
         print('> added {} columns'.format(len(dummies_df1.columns)))
         return dummies_df1
 
@@ -164,13 +174,14 @@ def get_features_df(videos_df, data_sets):
         'text':text,
         'categorical_1':categorical_1,
         'numerical':numerical,
-        'array':array,
+        'array_1':array_1,
+        'array_2':array_2,
         'categorical_2':categorical_2
     }
     
     explainers = {
         'categorical_1':'categorical_2',
-        'array':'array',
+        'array_2':'array_1',
         'categorical_2':'categorical_2'
         # add explainers for text
         # add gower for array
@@ -447,7 +458,7 @@ if __name__ == "__main__":
     parser.add_argument('--max_clusters',help='maximum number of clusters',type=int,default=15)
     parser.add_argument('--scorer',help='the scorer to use for choosing the best cluster',type=str,default='silhouette_score',choices=['silhouette_score','inertia','calinski_harabasz_score','davies_bouldin_score'])
     parser.add_argument('--scorers',help='which scorers to calculate',type=str,default='silhouette_score')
-    parser.add_argument('--stages',help='stages of clustering',type=str,default='best_K_means@10:array,categorical_1>pca,0.99')
+    parser.add_argument('--stages',help='stages of clustering',type=str,default='best_K_means@10:array_2,categorical_1>pca,0.99')
  
     args = parse_args()
 
