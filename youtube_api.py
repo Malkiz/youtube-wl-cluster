@@ -17,8 +17,7 @@ from matplotlib import cm
 from sklearn.decomposition import FactorAnalysis
 import itertools
 import sys
-sys.path.insert(1, '../gower/gower')
-from gower_dist import gower_matrix
+from gower import gower_matrix
 
 def chunk_df(df, n=10):
     return [df[i:i+n] for i in range(0,df.shape[0],n)]
@@ -133,7 +132,7 @@ def get_features_df(videos_df, data_sets):
         print('> added {} columns'.format(len(text_df.columns)))
         return text_df
 
-    def categorical_1():
+    def categorical_gower():
         print('using categorical data - Gower', end=' ')
         categorical_df = pd.DataFrame(gower_matrix(videos_df.loc[:, category_columns], cat_features = [True for v in category_columns])).set_index(videos_df.index)
         print('> added {} columns'.format(len(categorical_df.columns)))
@@ -147,24 +146,27 @@ def get_features_df(videos_df, data_sets):
     def get_array_dummies(df, column):
         return pd.get_dummies(df[column].fillna('').apply(pd.Series).stack(), dtype=int).sum(level=0)
 
+    def dummies_gower(df, options={'method':'pca','variance':0.99}):
+        return pd.DataFrame(gower_matrix(compress( df, options).applymap(str))).set_index(videos_df.index)
+
     def array():
         dummies_arr = map(lambda col: get_array_dummies(videos_df, col), array_columns)
         dummies_df1 = pd.concat(dummies_arr, axis=1, sort=False)
         return dummies_df1
 
-    def array_1():
+    def array_dummies():
         print('using array data', end=' ')
         dummies_df1 = array()
         print('> added {} columns'.format(len(dummies_df1.columns)))
         return dummies_df1
 
-    def array_2():
+    def array_gower():
         print('using array Gower data', end=' ')
-        dummies_df1 = pd.DataFrame(gower_matrix(array().applymap(str)))
+        dummies_df1 = dummies_gower(array())
         print('> added {} columns'.format(len(dummies_df1.columns)))
         return dummies_df1
 
-    def categorical_2():
+    def categorical_dummies():
         print('using categorical data - dummies', end=' ')
         dummies_df2 = pd.concat(map(lambda col: pd.get_dummies(videos_df[col].fillna(''), dtype=int), category_columns), axis=1, sort=False)
         print('> added {} columns'.format(len(dummies_df2.columns)))
@@ -172,17 +174,17 @@ def get_features_df(videos_df, data_sets):
        
     data_getters = {
         'text':text,
-        'categorical_1':categorical_1,
+        'categorical_gower':categorical_gower,
         'numerical':numerical,
-        'array_1':array_1,
-        'array_2':array_2,
-        'categorical_2':categorical_2
+        'array_dummies':array_dummies,
+        'array_gower':array_gower,
+        'categorical_dummies':categorical_dummies
     }
     
     explainers = {
-        'categorical_1':'categorical_2',
-        'array_2':'array_1',
-        'categorical_2':'categorical_2'
+        'categorical_gower':'categorical_dummies',
+        'array_gower':'array_dummies',
+        'categorical_dummies':'categorical_dummies'
         # add explainers for text
         # add gower for array
     }
@@ -458,7 +460,7 @@ if __name__ == "__main__":
     parser.add_argument('--max_clusters',help='maximum number of clusters',type=int,default=15)
     parser.add_argument('--scorer',help='the scorer to use for choosing the best cluster',type=str,default='silhouette_score',choices=['silhouette_score','inertia','calinski_harabasz_score','davies_bouldin_score'])
     parser.add_argument('--scorers',help='which scorers to calculate',type=str,default='silhouette_score')
-    parser.add_argument('--stages',help='stages of clustering',type=str,default='best_K_means@10:array_2,categorical_1>pca,0.99')
+    parser.add_argument('--stages',help='stages of clustering',type=str,default='best_K_means@10:array_gower,categorical_gower>pca,0.99')
  
     args = parse_args()
 
