@@ -160,7 +160,7 @@ def get_features_df(videos_df, data_sets):
 
     def array_2():
         print('using array Gower data', end=' ')
-        dummies_df1 = pd.DataFrame(gower_matrix(array()))
+        dummies_df1 = pd.DataFrame(gower_matrix(array().applymap(str)))
         print('> added {} columns'.format(len(dummies_df1.columns)))
         return dummies_df1
 
