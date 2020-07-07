@@ -146,8 +146,8 @@ def get_features_df(videos_df, data_sets):
     def get_array_dummies(df, column):
         return pd.get_dummies(df[column].fillna('').apply(pd.Series).stack(), dtype=int).sum(level=0)
 
-    def dummies_gower(df, options={'method':'pca','variance':0.99}):
-        return pd.DataFrame(gower_matrix(compress( df, options).applymap(str))).set_index(videos_df.index)
+    def dummies_gower(df):
+        return pd.DataFrame(gower_matrix(df.applymap(str))).set_index(videos_df.index)
 
     def array():
         dummies_arr = map(lambda col: get_array_dummies(videos_df, col), array_columns)
