@@ -199,7 +199,8 @@ def get_features_df(videos_df, data_sets):
         'categorical_dummies':'categorical_dummies',
         'text_gower':'text_dummies',
         'text_dummies':'text_dummies',
-        'array_dummies':'array_dummies'
+        'array_dummies':'array_dummies',
+        'text_vectorizer':'text_dummies'
     }
     all_dfs_dict = {n: data_getters[n]() for n in data_sets }
 
