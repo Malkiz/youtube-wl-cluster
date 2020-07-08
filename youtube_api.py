@@ -123,7 +123,7 @@ def get_features_df(videos_df, data_sets):
     array_columns = ['tags','relevantTopicIds','topicCategories','topicIds']
     category_columns = ['channelTitle','category']
 
-    def text():
+    def text_vectorizer():
         print('using text data', end=' ')
         vectorizer = CountVectorizer()
         corpus = videos_df.loc[:, text_columns].values.sum(axis=1)
@@ -147,7 +147,7 @@ def get_features_df(videos_df, data_sets):
         return pd.get_dummies(df[column].fillna('').apply(pd.Series).stack(), dtype=int).sum(level=0)
 
     def dummies_gower(df):
-        return pd.DataFrame(gower_matrix(df.applymap(str))).set_index(videos_df.index)
+        return pd.DataFrame(gower_matrix(df.applymap(str), cat_features = [True for v in df.columns])).set_index(videos_df.index)
 
     def array():
         dummies_arr = map(lambda col: get_array_dummies(videos_df, col), array_columns)
@@ -166,6 +166,16 @@ def get_features_df(videos_df, data_sets):
         print('> added {} columns'.format(len(dummies_df1.columns)))
         return dummies_df1
 
+    def text_dummies():
+        corpus = map(lambda s: set(s.split(' ')), videos_df.loc[:, text_columns].values.sum(axis=1))
+        dummies_df = get_array_dummies(pd.DataFrame(corpus), 0).set_index(videos_df.index)
+        return dummies_df
+
+    def text_gower():
+        t = text_dummies()
+        df = dummies_gower(t)
+        return df
+
     def categorical_dummies():
         print('using categorical data - dummies', end=' ')
         dummies_df2 = pd.concat(map(lambda col: pd.get_dummies(videos_df[col].fillna(''), dtype=int), category_columns), axis=1, sort=False)
@@ -173,7 +183,9 @@ def get_features_df(videos_df, data_sets):
         return dummies_df2
        
     data_getters = {
-        'text':text,
+        'text_vectorizer':text_vectorizer,
+        'text_gower':text_gower,
+        'text_dummies':text_dummies,
         'categorical_gower':categorical_gower,
         'numerical':numerical,
         'array_dummies':array_dummies,
@@ -184,9 +196,10 @@ def get_features_df(videos_df, data_sets):
     explainers = {
         'categorical_gower':'categorical_dummies',
         'array_gower':'array_dummies',
-        'categorical_dummies':'categorical_dummies'
-        # add explainers for text
-        # add gower for array
+        'categorical_dummies':'categorical_dummies',
+        'text_gower':'text_dummies',
+        'text_dummies':'text_dummies',
+        'array_dummies':'array_dummies'
     }
     all_dfs_dict = {n: data_getters[n]() for n in data_sets }
 
