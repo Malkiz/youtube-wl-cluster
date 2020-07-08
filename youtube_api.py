@@ -32,6 +32,10 @@ cacheTypes = {
     "json": {
         "load": lambda f: json.load(f),
         "save": lambda data, f: json.dump(data, f)
+    },
+    "csv": {
+        "load": lambda f: pd.read_csv(f, index_col=0),
+        "save": lambda data, f: data.to_csv(f)
     }
 }
 def cache(filename, get_data_fn, cacher):
@@ -47,6 +51,9 @@ def cache(filename, get_data_fn, cacher):
 
 def cache_json(filename, get_data_fn):
     return cache(filename, get_data_fn, cacheTypes['json'])
+
+def cache_csv(filename, get_data_fn):
+    return cache(filename, get_data_fn, cacheTypes['csv'])
 
 _youtube = False
 def youtube():
@@ -203,11 +210,15 @@ def get_features_df(videos_df, data_sets):
         'array_dummies':'array_dummies',
         'text_vectorizer':'text_dummies'
     }
-    all_dfs_dict = {n: data_getters[n]() for n in data_sets }
+
+    def cache_getter(n):
+        return cache_csv(args.file + '_' + n + '.csv', data_getters[n])
+
+    all_dfs_dict = {n: cache_getter(n) for n in data_sets }
 
     exp_data_sets = set( [explainers[n] if n in explainers else None for n in data_sets] )
     exp_data_sets.discard(None)
-    exp_dfs_dict = {n: all_dfs_dict[n] if n in all_dfs_dict else data_getters[n]() for n in exp_data_sets }
+    exp_dfs_dict = {n: all_dfs_dict[n] if n in all_dfs_dict else cache_getter(n) for n in exp_data_sets }
     return ( all_dfs_dict, exp_dfs_dict )
 
 def compress(features_df, options):
