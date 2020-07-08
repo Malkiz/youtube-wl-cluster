@@ -169,7 +169,7 @@ def get_features_df(videos_df, data_sets):
 
     def array_gower():
         print('using array Gower data', end=' ')
-        dummies_df1 = dummies_gower(array())
+        dummies_df1 = dummies_gower(cache_getter('array_dummies'))
         print('> added {} columns'.format(len(dummies_df1.columns)))
         return dummies_df1
 
@@ -180,7 +180,7 @@ def get_features_df(videos_df, data_sets):
         return dummies_df
 
     def text_gower():
-        t = text_dummies()
+        t = cache_getter('text_dummies')
         df = dummies_gower(t)
         return df
 
