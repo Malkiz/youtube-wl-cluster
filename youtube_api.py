@@ -167,8 +167,9 @@ def get_features_df(videos_df, data_sets):
         return dummies_df1
 
     def text_dummies():
-        corpus = map(lambda s: set(s.split(' ')), videos_df.loc[:, text_columns].values.sum(axis=1))
-        dummies_df = get_array_dummies(pd.DataFrame(corpus), 0).set_index(videos_df.index)
+        corpus = videos_df.loc[:, text_columns].applymap(lambda s: s.split(' '))
+        dummies_arr = map(lambda col: get_array_dummies(corpus, col), text_columns)
+        dummies_df = pd.concat(dummies_arr, axis=1, sort=False)
         return dummies_df
 
     def text_gower():
