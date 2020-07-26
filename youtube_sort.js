@@ -2,7 +2,7 @@ async function load_deps(options = {}) {
 	// await fetch('https://apis.google.com/js/api.js')
 	await gapi.load("client:auth2");
 	await waitFor(() => gapi.auth2)
-	await gapi.auth2.init({client_id: options.client_id});
+	await gapi.auth2.init({client_id: ytcfg.get("ID_TOKEN")});
 	await authenticate()
 	await loadClient(options)
 }
