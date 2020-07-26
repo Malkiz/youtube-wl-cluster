@@ -7,7 +7,7 @@ async function load_deps(options = {}) {
 	await loadClient(options)
 }
 
-function waitFor(fn) {
+async function waitFor(fn) {
 	while(!fn()) { await delay(50) }
 }
 function delay(ms) {
