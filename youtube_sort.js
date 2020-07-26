@@ -18,11 +18,31 @@ async function youtube_sort_malkiz(options) {
 	const ids = [...new Set([...document.querySelectorAll("a[href^='/watch']")].map(e => e.href.match(/v=([^&]*)/)[1]))]
 	console.log(`Found ${ids.length} video ids`);
 	const data = await get_videos_data(ids);
+	console.log('getting categories list');
+	const cats = await categories();
+	console.log('mapping category names');
+	data.forEach(d => {
+		const category = categories.find(c => c.id == d.snippet.categoryId)
+		d.category = category && category.snippet.title;
+	});
 	console.log('sorting')
-	const sorted = data.sort((a, b) => str_sort(a.snippet.categoryId, b.snippet.categoryId))
+	const sorted = data.sort((a, b) => str_sort(a.category, b.category))
 	console.log('printing results')
 	console.log(sorted)
 	print(sorted)
+}
+
+function categories() {
+	return gapi.client.youtube.videoCategories.list({
+		"part": [
+			"snippet"
+		],
+		"regionCode": "US"
+	})
+		.then(function(response) {
+			return response.items
+		},
+			function(err) { console.error("Execute error", err); });
 }
 
 function str_sort(a, b) {
@@ -89,7 +109,7 @@ function print(videos) {
 		${sorted.map((video, index) => `
 			<tr style="padding: 1em;">
 			<td style="color: hsla(0, 0%, 6.7%, .6);">${index + 1}</td>
-			<td>${video.snippet.categoryId}</td>
+			<td>${video.category}</td>
 			<td>${youtubeLink(video.id, `<img src="${video.snippet.thumbnails.default.url}">`)}</td>
 			<td>${youtubeLink(video.id, video.snippet.localized.title)}</a></td>
 			</tr>
@@ -103,5 +123,5 @@ function print(videos) {
 }
 
 function youtubeLink(videoId, children) {
-	  return `<a href="/watch?v=${videoId}" target="_blank">${children}</a>`;
+	return `<a href="/watch?v=${videoId}" target="_blank">${children}</a>`;
 }
