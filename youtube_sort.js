@@ -108,9 +108,9 @@ function print(videos) {
 		<thead>
 		<tr>
 		<th></th>
-		<th style="cursor: pointer; border-bottom: 1px solid;">category</th>
-		<th style="cursor: pointer; border-bottom: 1px solid;">date</th>
-		<th style="cursor: pointer; border-bottom: 1px solid;">channel</th>
+		<th>category</th>
+		<th>date</th>
+		<th>channel</th>
 		<th></th>
 		<th>Video</th>
 		</tr>
