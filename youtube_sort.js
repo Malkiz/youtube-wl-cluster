@@ -25,11 +25,11 @@ async function youtube_sort_malkiz(options) {
 		const category = cats.find(c => c.id == d.snippet.categoryId);
 		d.category = category && category.snippet.title;
 	});
-	console.log('sorting')
-	const sorted = data.sort((a, b) => str_sort(a.category, b.category))
-	console.log('printing results')
-	console.log(sorted)
-	print(sorted)
+	console.log('sorting');
+	const sorted = data.sort((a, b) => str_sort(a.category, b.category));
+	console.log('printing results');
+	console.log(sorted);
+	print(sorted);
 }
 
 function categories() {
