@@ -1,11 +1,15 @@
 async function load_deps(options = {}) {
 	// await fetch('https://apis.google.com/js/api.js')
 	await gapi.load("client:auth2");
+	await waitFor(() => gapi.auth2)
 	await gapi.auth2.init({client_id: options.client_id});
 	await authenticate()
 	await loadClient(options)
 }
 
+function waitFor(fn) {
+	while(!fn()) { await delay(50) }
+}
 function delay(ms) {
 	return new Promise(resolve => setTimeout(resolve,ms))
 }
