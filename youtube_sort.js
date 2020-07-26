@@ -18,7 +18,14 @@ async function youtube_sort_malkiz(options) {
 	const ids = [...new Set([...document.querySelectorAll("a[href^='/watch']")].map(e => e.href.match(/v=([^&]*)/)[1]))]
 	console.log(`Found ${ids.length} video ids`);
 	const data = await get_videos_data(ids);
-	console.log(data)
+	const sorted = data.sort((a, b) => str_sort(a.snippet.categoryId, b.snippet.categoryId))
+	console.log(sorted)
+}
+
+function str_sort(a, b) {
+	if (a > b) return 1;
+	if (a < b) return -1;
+	return 0;
 }
 
 async function get_videos_data(ids) {
