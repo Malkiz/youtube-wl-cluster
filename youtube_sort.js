@@ -1,6 +1,6 @@
 async function load_deps(options = {}) {
-	// <script src="https://apis.google.com/js/api.js"></script>
-	gapi.load("client:auth2", function() {
+	await fetch('https://apis.google.com/js/api.js')
+	await gapi.load("client:auth2", function() {
 		gapi.auth2.init({client_id: options.client_id});
 	});
 	await authenticate()
