@@ -18,8 +18,11 @@ async function youtube_sort_malkiz(options) {
 	const ids = [...new Set([...document.querySelectorAll("a[href^='/watch']")].map(e => e.href.match(/v=([^&]*)/)[1]))]
 	console.log(`Found ${ids.length} video ids`);
 	const data = await get_videos_data(ids);
+	console.log('sorting')
 	const sorted = data.sort((a, b) => str_sort(a.snippet.categoryId, b.snippet.categoryId))
+	console.log('printing results')
 	console.log(sorted)
+	print(sorted)
 }
 
 function str_sort(a, b) {
@@ -67,4 +70,38 @@ function execute(ids = []) {
 			return response.result.items
 		},
 			function(err) { console.error("Execute error", err); })
+}
+
+function print(videos) {
+	const sorted = Array.from(videos)
+
+	const html = `
+		<table style="color: hsl(0, 0%, 6.7%); font-family: Roboto, Arial, sans-serif; border-spacing: 1em;">
+		<thead>
+		<tr>
+		<th></th>
+		<th style="cursor: pointer; border-bottom: 1px solid;">category</th>
+		<th></th>
+		<th>Video</th>
+		</tr>
+		</thead>
+		<tbody>
+		${sorted.map((video, index) => `
+			<tr style="padding: 1em;">
+			<td style="color: hsla(0, 0%, 6.7%, .6);">${index + 1}</td>
+			<td>${video.snippet.categoryId}</td>
+			<td>${youtubeLink(video.id, `<img src="${video.snippet.thumbnails.default.url}">`)}</td>
+			<td>${youtubeLink(video.id, video.snippet.localized.title)}</a></td>
+			</tr>
+			`).join("\n")}
+		</tbody>
+		</table>
+		`;
+
+	document.write(html);
+	document.close();
+}
+
+function youtubeLink(videoId, children) {
+	  return `<a href="/watch?v=${videoId}" target="_blank">${children}</a>`;
 }
