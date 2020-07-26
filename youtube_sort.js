@@ -1,9 +1,10 @@
 async function load_deps(options = {}) {
 	// await fetch('https://apis.google.com/js/api.js')
-	await gapi.load("client:auth2");
-	await waitFor(() => gapi.auth2)
-	await gapi.auth2.init({client_id: options.client_id});
-	await authenticate()
+	// await gapi.load("client:auth2");
+	// await waitFor(() => gapi.auth2)
+	// await gapi.auth2.init({client_id: options.client_id});
+	// await authenticate()
+	gapi.client.init({ 'apiKey': options.api_key })
 	await loadClient(options)
 }
 
@@ -40,12 +41,12 @@ function join_concat(arrs) {
 	return arrs.reduce((a, item) => a.concat(item), [])
 }
 
-function authenticate() {
+/*function authenticate() {
 	return gapi.auth2.getAuthInstance()
 		.signIn({scope: "https://www.googleapis.com/auth/youtube.readonly"})
 		.then(function() { console.log("Sign-in successful"); },
 			function(err) { console.error("Error signing in", err); });
-}
+}*/
 function loadClient(options) {
 	gapi.client.setApiKey(options.api_key);
 	return gapi.client.load("https://www.googleapis.com/discovery/v1/apis/youtube/v3/rest")
