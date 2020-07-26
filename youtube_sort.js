@@ -22,7 +22,7 @@ async function youtube_sort_malkiz(options) {
 	const cats = await categories();
 	console.log('mapping category names');
 	data.forEach(d => {
-		const category = cats.find(c => c.id == d.snippet.categoryId)
+		const category = cats.find(c => c.id == d.snippet.categoryId);
 		d.category = category && category.snippet.title;
 	});
 	console.log('sorting')
