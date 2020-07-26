@@ -1,9 +1,5 @@
 async function load_deps(options = {}) {
 	// await fetch('https://apis.google.com/js/api.js')
-	// await gapi.load("client:auth2");
-	// await waitFor(() => gapi.auth2)
-	// await gapi.auth2.init({client_id: options.client_id});
-	// await authenticate()
 	await gapi.load("client");
 	await waitFor(() => gapi.client);
 	await gapi.client.init({ 'apiKey': options.api_key });
@@ -20,11 +16,14 @@ function delay(ms) {
 async function youtube_sort_malkiz(options) {
 	await load_deps(options)
 	const ids = [...new Set([...document.querySelectorAll("a[href^='/watch']")].map(e => e.href.match(/v=([^&]*)/)[1]))]
+	console.log(`Found ${ids.length} video ids`);
 	const data = get_videos_data(ids)
+	console.log(data)
 }
 
 async function get_videos_data(ids) {
 	const ids_chunks = chunk(ids, 50)
+	console.log(`getting data in ${ids_chunks.length} chunks`)
 	const promises = ids_chunks.map(chunk => execute(chunk))
 	const results = await Promise.all(promises)
 	return join_concat(results)
@@ -43,12 +42,6 @@ function join_concat(arrs) {
 	return arrs.reduce((a, item) => a.concat(item), [])
 }
 
-/*function authenticate() {
-	return gapi.auth2.getAuthInstance()
-		.signIn({scope: "https://www.googleapis.com/auth/youtube.readonly"})
-		.then(function() { console.log("Sign-in successful"); },
-			function(err) { console.error("Error signing in", err); });
-}*/
 function loadClient(options) {
 	gapi.client.setApiKey(options.api_key);
 	return gapi.client.load("https://www.googleapis.com/discovery/v1/apis/youtube/v3/rest")
@@ -64,7 +57,7 @@ function execute(ids = []) {
 		"id": [ ids.join(',') ]
 	})
 		.then(function(response) {
-			console.log("Response", response);
+			return response.result.items
 		},
-			function(err) { console.error("Execute error", err); });
+			function(err) { console.error("Execute error", err); })
 }
