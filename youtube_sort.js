@@ -5,9 +5,9 @@ async function load_deps(options = {}) {
 	// await gapi.auth2.init({client_id: options.client_id});
 	// await authenticate()
 	await gapi.load("client");
-	await waitFor(() => gapi.client)
-	gapi.client.init({ 'apiKey': options.api_key })
-	await loadClient(options)
+	await waitFor(() => gapi.client);
+	await gapi.client.init({ 'apiKey': options.api_key });
+	await loadClient(options);
 }
 
 async function waitFor(fn) {
