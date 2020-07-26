@@ -40,7 +40,7 @@ function categories() {
 		"regionCode": "US"
 	})
 		.then(function(response) {
-			return response.items
+			return response.result.items
 		},
 			function(err) { console.error("Execute error", err); });
 }
