@@ -26,7 +26,7 @@ async function youtube_sort_malkiz(options) {
 		d.category = category && category.snippet.title;
 	});
 	console.log('sorting');
-	const sorted = data.sort((a, b) => str_sort(a.category, b.category));
+	const sorted = data.sort((a, b) => vid_sort(a, b));
 	console.log('printing results');
 	console.log(sorted);
 	print(sorted);
@@ -43,6 +43,14 @@ function categories() {
 			return response.result.items
 		},
 			function(err) { console.error("Execute error", err); });
+}
+
+function vid_sort(a, b) {
+	let res = str_sort(a.category, b.category);
+	if (res) return res;
+	res = str_sort(new Date(a.snippet.publishedAt), new Date(b.snippet.publishedAt))
+	if (res) return res;
+	return str_sort(a.snippet.channelTitle, b.snippet.channelTitle)
 }
 
 function str_sort(a, b) {
@@ -101,6 +109,8 @@ function print(videos) {
 		<tr>
 		<th></th>
 		<th style="cursor: pointer; border-bottom: 1px solid;">category</th>
+		<th style="cursor: pointer; border-bottom: 1px solid;">date</th>
+		<th style="cursor: pointer; border-bottom: 1px solid;">channel</th>
 		<th></th>
 		<th>Video</th>
 		</tr>
@@ -110,6 +120,8 @@ function print(videos) {
 			<tr style="padding: 1em;">
 			<td style="color: hsla(0, 0%, 6.7%, .6);">${index + 1}</td>
 			<td>${video.category}</td>
+			<td>${video.snippet.publishedAt}</td>
+			<td>${video.snippet.channelTitle}</td>
 			<td>${youtubeLink(video.id, `<img src="${video.snippet.thumbnails.default.url}">`)}</td>
 			<td>${youtubeLink(video.id, video.snippet.localized.title)}</a></td>
 			</tr>
