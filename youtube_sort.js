@@ -158,12 +158,13 @@ function print(videos, play_first = true) {
 
 	var div = document.getElementById('videos_list_div_malkiz');
 	if (!div) {
+		const urlParams = new URLSearchParams(window.location.search);
 		const html = `
 			<div id="player"></div>
 			<button onclick="window.play_prev()">PREV</button>
 			<button onclick="window.play_next()">NEXT</button>
 			<button onclick="window.remove_current()">REMOVE</button>
-			<input type="text" placeholder="playlist" value="WL" id="playlist-id"/>
+			<input type="text" placeholder="playlist" value="${urlParams.get('list') || ''}" id="playlist-id"/>
 			<script></script>
 			<div id="videos_list_div_malkiz" style="overflow-y: scroll; height:800px;">
 			${table}
