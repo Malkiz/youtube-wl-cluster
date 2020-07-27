@@ -23,8 +23,8 @@ async function youtube_sort_malkiz(opts) {
 	console.log('getting categories list');
 	const cats = await categories();
 	console.log('mapping category names');
-	data.forEach((d,i) => {
-		d.index = i;
+	data.forEach(d => {
+		d.index = ids.findIndex(id => id == d.id);
 		const category = cats.find(c => c.id == d.snippet.categoryId);
 		d.category = category && category.snippet.title;
 	});
