@@ -44,6 +44,11 @@ function categories() {
 			function(err) { console.error("Execute error", err); });
 }
 
+const values = {
+	category: video => video.category,
+	published: video => video.snippet.publishedAt,
+	channel: video => video.snippet.channelTitle
+}
 const sorters = {
 	category: (a, b) => str_sort(a.category, b.category),
 	published: (a, b) => str_sort(new Date(a.snippet.publishedAt), new Date(b.snippet.publishedAt)),
@@ -116,15 +121,14 @@ window.resort = function resort(videos) {
 function print(videos) {
 	console.log('sorting');
 	const sorted = Array.from(videos).sort((a, b) => vid_sort(a, b));
+	const o = orders[order_index]
 
 	const html = `
 		<table style="color: hsl(0, 0%, 6.7%); font-family: Roboto, Arial, sans-serif; border-spacing: 1em;">
 		<thead>
 		<tr>
 		<th onclick="resort(window.videos_for_print)" style="cursor: pointer; border-bottom: 1px solid;">#</th>
-		<th>category</th>
-		<th>date</th>
-		<th>channel</th>
+		${o.map(s => `<th>${s}</th>`).join('\n')}
 		<th></th>
 		<th>Video</th>
 		</tr>
@@ -133,9 +137,7 @@ function print(videos) {
 		${sorted.map((video, index) => `
 			<tr style="padding: 1em;">
 			<td style="color: hsla(0, 0%, 6.7%, .6);">${index + 1}</td>
-			<td>${video.category}</td>
-			<td>${video.snippet.publishedAt}</td>
-			<td>${video.snippet.channelTitle}</td>
+			${o.map(s => `<td>${values[s](video)}</td>`).join('\n')}
 			<td>${youtubeLink(video.id, `<img src="${video.snippet.thumbnails.default.url}">`)}</td>
 			<td>${youtubeLink(video.id, video.snippet.localized.title)}</a></td>
 			</tr>
