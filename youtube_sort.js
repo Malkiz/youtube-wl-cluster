@@ -126,6 +126,7 @@ function print(videos) {
 
 	const html = `
 		<div id="player"></div>
+		<script></script>
 		<div>
 		<table style="color: hsl(0, 0%, 6.7%); font-family: Roboto, Arial, sans-serif; border-spacing: 1em;">
 		<thead>
