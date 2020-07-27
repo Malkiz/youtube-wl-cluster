@@ -125,6 +125,8 @@ function print(videos) {
 	const o = orders[order_index]
 
 	const html = `
+		<div id="player"></div>
+		<div>
 		<table style="color: hsl(0, 0%, 6.7%); font-family: Roboto, Arial, sans-serif; border-spacing: 1em;">
 		<thead>
 		<tr>
@@ -145,12 +147,49 @@ function print(videos) {
 			`).join("\n")}
 		</tbody>
 		</table>
+		</div>
 		`;
 
 	document.write(html);
 	document.close();
+
+	player()
 }
 
 function youtubeLink(videoId, children) {
 	return `<a href="/watch?v=${videoId}" target="_blank">${children}</a>`;
+}
+
+function player() {
+	var tag = document.createElement('script');
+
+	tag.src = "https://www.youtube.com/iframe_api";
+	var firstScriptTag = document.getElementsByTagName('script')[0];
+	firstScriptTag.parentNode.insertBefore(tag, firstScriptTag);
+
+	var player;
+	window.onYouTubeIframeAPIReady = function onYouTubeIframeAPIReady() {
+		player = new YT.Player('player', {
+			height: '390',
+			width: '640',
+			videoId: 'M7lc1UVf-VE',
+			events: {
+				'onReady': onPlayerReady,
+				'onStateChange': onPlayerStateChange
+			}
+		});
+	}
+	window.onPlayerReady = function onPlayerReady(event) {
+		event.target.playVideo();
+	}
+	var done = false;
+	window.onPlayerStateChange = function onPlayerStateChange(event) {
+		if (event.data == YT.PlayerState.PLAYING && !done) {
+			setTimeout(stopVideo, 6000);
+			done = true;
+		}
+	}
+	window.stopVideo = function stopVideo() {
+		player.stopVideo();
+	}
 }
