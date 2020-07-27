@@ -121,13 +121,13 @@ window.resort = function resort(videos) {
 
 function print(videos) {
 	console.log('sorting');
-	const sorted = Array.from(videos).sort((a, b) => vid_sort(a, b));
+	const sorted = window.videos_for_print = Array.from(videos).sort((a, b) => vid_sort(a, b));
 	const o = orders[order_index]
 
 	const html = `
 		<div id="player"></div>
 		<script></script>
-		<div>
+		<div style="overflow-y: scroll; height:1000px;">
 		<table style="color: hsl(0, 0%, 6.7%); font-family: Roboto, Arial, sans-serif; border-spacing: 1em;">
 		<thead>
 		<tr>
@@ -173,7 +173,7 @@ function player() {
 		player = new YT.Player('player', {
 			height: '390',
 			width: '640',
-			videoId: 'M7lc1UVf-VE',
+			videoId: window.videos_for_print[0].id,
 			events: {
 				'onReady': onPlayerReady,
 				'onStateChange': onPlayerStateChange
