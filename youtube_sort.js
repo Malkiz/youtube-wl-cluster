@@ -147,7 +147,7 @@ function print(videos) {
 		</table>
 		`;
 
-	var div = document.getElementsById('videos_list_div_malkiz');
+	var div = document.getElementById('videos_list_div_malkiz');
 	if (!div) {
 		const html = `
 			<div id="player"></div>
@@ -159,7 +159,7 @@ function print(videos) {
 
 		document.write(html);
 		document.close();
-		
+
 		player()
 	} else {
 		div.innerHTML = table
