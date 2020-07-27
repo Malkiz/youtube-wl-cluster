@@ -151,6 +151,7 @@ function print(videos) {
 	if (!div) {
 		const html = `
 			<div id="player"></div>
+			<button onclick="window.play_prev()">PREV</button>
 			<button onclick="window.play_next()">NEXT</button>
 			<script></script>
 			<div id="videos_list_div_malkiz" style="overflow-y: scroll; height:800px;">
@@ -214,6 +215,9 @@ function player() {
 	}
 	window.play_next = function play_next() {
 		play_index(curr_video_index + 1)
+	}
+	window.play_prev = function play_prev() {
+		play_index(curr_video_index - 1)
 	}
 	window.play_index = function play_index(index) {
 		curr_video_index = index;
