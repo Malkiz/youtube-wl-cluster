@@ -161,10 +161,15 @@ function print(videos, play_first = true) {
 		const urlParams = new URLSearchParams(window.location.search);
 		const html = `
 			<div id="player"></div>
+			<div>
 			<button onclick="window.play_prev()">PREV</button>
 			<button onclick="window.play_next()">NEXT</button>
 			<button onclick="window.remove_current()">REMOVE</button>
 			<input type="text" placeholder="playlist" value="${urlParams.get('list') || ''}" id="playlist-id"/>
+			<button onclick="window.do_like(window.current_id())">LIKE</button>
+			<button onclick="window.do_dislike(window.current_id())">DISLIKE</button>
+			<button onclick="window.do_unlike(window.current_id())">UNLIKE</button>
+			</div>
 			<script></script>
 			<div id="videos_list_div_malkiz" style="overflow-y: scroll; height:800px;">
 			${table}
@@ -199,7 +204,7 @@ function player() {
 		player = new YT.Player('player', {
 			height: '390',
 			width: '640',
-			videoId: window.videos_for_print[curr_video_index].id,
+			videoId: current_id(),
 			events: {
 				'onReady': onPlayerReady,
 				'onStateChange': onPlayerStateChange
@@ -213,6 +218,7 @@ function player() {
 		console.log('player state changed:', event.data)
 		switch (event.data) {
 			case YT.PlayerState.ENDED:
+				prompt_like()
 				remove_current()
 				break;
 			case YT.PlayerState.UNSTARTED:
@@ -232,16 +238,29 @@ function player() {
 	}
 	window.play_index = function play_index(index) {
 		curr_video_index = index;
-		player.loadVideoById(window.videos_for_print[curr_video_index].id, 0)
+		player.loadVideoById(current_id(), 0)
 		const row = document.getElementById(`row_${index}`)
 		const topPos = row.offsetTop;
 		document.getElementById('videos_list_div_malkiz').scrollTop = topPos;
 	}
 	window.remove_current = function remove_current() {
-		const success = remove_video(window.videos_for_print[curr_video_index].id)
+		const success = remove_video(current_id())
 		if (success) play_index(curr_video_index);
 		else play_next()
 	}
+	function prompt_like() {
+		const ans = prompt("Did you like the video? y = like, n = dislike, c = clear, empty = do nothing", '')
+		const id = current_id();
+		switch(ans.toLowerCase()) {
+			case 'y': return do_like(id);
+			case 'n': return do_dislike(id);
+			case 'c': return do_unlike(id);
+		}
+	}
+}
+
+window.current_id = function current_id() {
+	return window.videos_for_print[curr_video_index].id
 }
 
 window.remove_video = function remove_video(id) {
@@ -260,7 +279,28 @@ function remove_video_from_playlist(id) {
 	}
 	const data = {"context":{"client":{"hl":"en","gl":"IL","visitorData":"","userAgent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:78.0) Gecko/20100101 Firefox/78.0,gzip(gfe)","clientName":"WEB","clientVersion":"2.20200724.05.01","osName":"Windows","osVersion":"10.0","browserName":"Firefox","browserVersion":"78.0","screenWidthPoints":863,"screenHeightPoints":722,"screenPixelDensity":1,"utcOffsetMinutes":180,"userInterfaceTheme":"USER_INTERFACE_THEME_DARK"},"request":{"sessionId":"0","internalExperimentFlags":[],"consistencyTokenJars":[]},"user":{},"clientScreenNonce":"","clickTracking":{"clickTrackingParams":""}},"actions":[{"action":"ACTION_REMOVE_VIDEO_BY_VIDEO_ID","removedVideoId":id}],"playlistId":playlist};
 	const url = 'https://www.youtube.com/youtubei/v1/browse/edit_playlist?key=' + ytcfg.get('INNERTUBE_API_KEY')
-	fetch(url, {
+	do_post(url, data)
+}
+
+window.do_like = function do_like(id) {
+	return like_url('https://www.youtube.com/youtubei/v1/like/like?key=', id)
+}
+
+window.do_dislike = function do_dislike(id) {
+	return like_url('https://www.youtube.com/youtubei/v1/like/dislike?key=', id)
+}
+
+window.do_unlike = function do_unlike(id) {
+	return like_url('https://www.youtube.com/youtubei/v1/like/removelike?key=', id)
+}
+
+function like_url(url, id) {
+	url += ytcfg.get('INNERTUBE_API_KEY')
+	const data = {"context":{"client":{"hl":"en","gl":"IL","visitorData":"","userAgent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:78.0) Gecko/20100101 Firefox/78.0,gzip(gfe)","clientName":"WEB","clientVersion":"2.20200724.05.01","osName":"Windows","osVersion":"10.0","browserName":"Firefox","browserVersion":"78.0","screenWidthPoints":874,"screenHeightPoints":722,"screenPixelDensity":1,"utcOffsetMinutes":180,"userInterfaceTheme":"USER_INTERFACE_THEME_DARK"},"request":{"sessionId":"0","internalExperimentFlags":[],"consistencyTokenJars":[{"encryptedTokenJarContents":"","expirationSeconds":"600"}]},"user":{},"clientScreenNonce":"","clickTracking":{"clickTrackingParams":""}},"target":{"videoId":id},"params":""};
+	do_post(url, data)
+}
+ function do_post(url, data) {
+	return fetch(url, {
 		method : "POST",
 		body: JSON.stringify(data),
 		headers: new Headers({Authorization: localStorage.getItem('malkiz_youtube_authorization') || options.authorization})
@@ -268,4 +308,4 @@ function remove_video_from_playlist(id) {
 		.then(
 			json => console.log(json.status)
 		);
-}
+ }
