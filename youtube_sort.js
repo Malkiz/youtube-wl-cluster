@@ -124,10 +124,7 @@ function print(videos) {
 	const sorted = window.videos_for_print = Array.from(videos).sort((a, b) => vid_sort(a, b));
 	const o = orders[order_index]
 
-	const html = `
-		<div id="player"></div>
-		<script></script>
-		<div style="overflow-y: scroll; height:1000px;">
+	const table = `
 		<table style="color: hsl(0, 0%, 6.7%); font-family: Roboto, Arial, sans-serif; border-spacing: 1em;">
 		<thead>
 		<tr>
@@ -148,13 +145,25 @@ function print(videos) {
 			`).join("\n")}
 		</tbody>
 		</table>
-		</div>
 		`;
 
-	document.write(html);
-	document.close();
+	var div = document.getElementsById('videos_list_div_malkiz');
+	if (!div) {
+		const html = `
+			<div id="player"></div>
+			<script></script>
+			<div id="videos_list_div_malkiz" style="overflow-y: scroll; height:1000px;">
+			${table}
+			</div>
+			`;
 
-	player()
+		document.write(html);
+		document.close();
+		
+		player()
+	} else {
+		div.innerHTML = table
+	}
 }
 
 function youtubeLink(videoId, children) {
