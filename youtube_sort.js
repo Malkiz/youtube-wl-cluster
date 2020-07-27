@@ -23,7 +23,8 @@ async function youtube_sort_malkiz(opts) {
 	console.log('getting categories list');
 	const cats = await categories();
 	console.log('mapping category names');
-	data.forEach(d => {
+	data.forEach((d,i) => {
+		d.index = i;
 		const category = cats.find(c => c.id == d.snippet.categoryId);
 		d.category = category && category.snippet.title;
 	});
@@ -47,16 +48,18 @@ function categories() {
 }
 
 const values = {
+	index: video => video.index,
 	category: video => video.category,
 	published: video => video.snippet.publishedAt,
 	channel: video => video.snippet.channelTitle
 }
 const sorters = {
+	index: (a, b) => str_sort(a.index, b.index),
 	category: (a, b) => str_sort(a.category, b.category),
 	published: (a, b) => str_sort(new Date(a.snippet.publishedAt), new Date(b.snippet.publishedAt)),
 	channel: (a, b) => str_sort(a.snippet.channelTitle, b.snippet.channelTitle)
 }
-const orders = [['category', 'published', 'channel'], ['category', 'channel', 'published']]
+const orders = [['index'], ['category', 'published', 'channel'], ['category', 'channel', 'published']]
 let order_index = 0;
 
 function vid_sort(a, b) {
