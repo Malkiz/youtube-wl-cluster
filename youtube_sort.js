@@ -139,7 +139,7 @@ function print(videos) {
 			<tr style="padding: 1em;">
 			<td style="color: hsla(0, 0%, 6.7%, .6);">${index + 1}</td>
 			${o.map(s => `<td>${values[s](video)}</td>`).join('\n')}
-			<td><img src="${video.snippet.thumbnails.default.url}" onclick="window.play_index(&{index})"></td>
+			<td><img src="${video.snippet.thumbnails.default.url}" onclick="window.play_index(${index})"></td>
 			<td>${youtubeLink(video.id, video.snippet.localized.title)}</a></td>
 			</tr>
 			`).join("\n")}
