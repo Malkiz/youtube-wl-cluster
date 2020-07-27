@@ -139,7 +139,7 @@ function print(videos) {
 			<tr style="padding: 1em;">
 			<td style="color: hsla(0, 0%, 6.7%, .6);">${index + 1}</td>
 			${o.map(s => `<td>${values[s](video)}</td>`).join('\n')}
-			<td>${youtubeLink(video.id, `<img src="${video.snippet.thumbnails.default.url}">`)}</td>
+			<td><img src="${video.snippet.thumbnails.default.url}" onclick="window.play_index(&{index})"></td>
 			<td>${youtubeLink(video.id, video.snippet.localized.title)}</a></td>
 			</tr>
 			`).join("\n")}
@@ -151,6 +151,7 @@ function print(videos) {
 	if (!div) {
 		const html = `
 			<div id="player"></div>
+			<button onclick="window.play_next()">NEXT</button>
 			<script></script>
 			<div id="videos_list_div_malkiz" style="overflow-y: scroll; height:800px;">
 			${table}
@@ -163,6 +164,7 @@ function print(videos) {
 		player()
 	} else {
 		div.innerHTML = table
+		window.play_index(0)
 	}
 }
 
@@ -201,7 +203,7 @@ function player() {
 				play_next()
 				break;
 			case YT.PlayerState.UNSTARTED:
-			case YT.PlayerState.CUED:
+			//case YT.PlayerState.CUED:
 				player.playVideo()
 				break;
 		}
@@ -210,7 +212,7 @@ function player() {
 		console.log('stopping video')
 		player.stopVideo();
 	}
-	function play_next() {
+	window.play_next = function play_next() {
 		play_index(curr_video_index + 1)
 	}
 	window.play_index = function play_index(index) {
