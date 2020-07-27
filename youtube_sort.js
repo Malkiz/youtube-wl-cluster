@@ -1,9 +1,9 @@
-async function load_deps(options = {}) {
+async function load_deps() {
 	// await fetch('https://apis.google.com/js/api.js')
 	await gapi.load("client");
 	await waitFor(() => gapi.client);
-	await gapi.client.init({ 'apiKey': options.api_key });
-	await loadClient(options);
+	await gapi.client.init({ 'apiKey': localStorage.getItem('api_key') || options.api_key });
+	await loadClient();
 }
 
 async function waitFor(fn) {
@@ -13,8 +13,10 @@ function delay(ms) {
 	return new Promise(resolve => setTimeout(resolve,ms))
 }
 
-async function youtube_sort_malkiz(options) {
-	await load_deps(options)
+let options;
+async function youtube_sort_malkiz(opts) {
+	options = opts;
+	await load_deps()
 	const ids = [...new Set([...document.querySelectorAll("a[href^='/watch']")].map(e => e.href.match(/v=([^&]*)/)[1]))]
 	console.log(`Found ${ids.length} video ids`);
 	const data = await get_videos_data(ids);
@@ -94,8 +96,8 @@ function join_concat(arrs) {
 	return arrs.reduce((a, item) => a.concat(item), [])
 }
 
-function loadClient(options) {
-	gapi.client.setApiKey(options.api_key);
+function loadClient() {
+	gapi.client.setApiKey(localStorage.getItem('api_key') || options.api_key);
 	return gapi.client.load("https://www.googleapis.com/discovery/v1/apis/youtube/v3/rest")
 		.then(function() { console.log("GAPI client loaded for API"); },
 			function(err) { console.error("Error loading GAPI client for API", err); });
@@ -233,9 +235,10 @@ function remove_video(id) {
 	const url = 'https://www.youtube.com/youtubei/v1/browse/edit_playlist?key=' + ytcfg.get('INNERTUBE_API_KEY')
 	fetch(url, {
 		method : "POST",
-		body: JSON.stringify(data)
-	}).then(response => response.text())
+		body: JSON.stringify(data),
+		headers: new Headers({Authorization: localStorage.getItem('malkiz_youtube_authorization') || options.authorization})
+	}).then(response => JSON.parse(response.text()))
 		.then(
-			html => console.log(html)
+			json => console.log(json.status)
 		);
 }
