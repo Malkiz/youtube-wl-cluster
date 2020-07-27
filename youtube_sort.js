@@ -245,6 +245,7 @@ function player() {
 		const row = document.getElementById(`row_${index}`)
 		const topPos = row.offsetTop;
 		document.getElementById('videos_list_div_malkiz').scrollTop = topPos;
+		document.getElementById('player').scrollIntoView()
 	}
 	window.remove_current = function remove_current() {
 		const success = remove_video(current_id())
