@@ -126,7 +126,7 @@ window.resort = function resort(videos) {
 
 function print(videos, play_first = true) {
 	console.log('sorting');
-	const sorted = window.videos_for_print = Array.from(videos).sort((a, b) => vid_sort(a, b));
+	const sorted = window.videos_for_print = Array.from(videos).sort(vid_sort);
 	const o = orders[order_index]
 
 	const table = `
