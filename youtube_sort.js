@@ -121,7 +121,7 @@ window.resort = function resort(videos) {
 	print(videos)
 }
 
-function print(videos) {
+function print(videos, play_first = true) {
 	console.log('sorting');
 	const sorted = window.videos_for_print = Array.from(videos).sort((a, b) => vid_sort(a, b));
 	const o = orders[order_index]
@@ -171,7 +171,7 @@ function print(videos) {
 		player()
 	} else {
 		div.innerHTML = table
-		window.play_index(0)
+		if (play_first) window.play_index(0)
 	}
 }
 
@@ -241,7 +241,7 @@ function player() {
 function remove_video(id) {
 	const len = window.videos_for_print.length;
 	window.videos_for_print = window.videos_for_print.filter(v => v.id != id);
-	print(window.videos_for_print);
+	print(window.videos_for_print, false);
 	remove_video_from_playlist(id);
 	return window.videos_for_print.length != len;
 }
