@@ -130,6 +130,7 @@ function print(videos) {
 		<table style="color: hsl(0, 0%, 6.7%); font-family: Roboto, Arial, sans-serif; border-spacing: 1em;">
 		<thead>
 		<tr>
+		<th></th>
 		<th onclick="resort(window.videos_for_print)" style="cursor: pointer; border-bottom: 1px solid;">#</th>
 		${o.map(s => `<th>${s}</th>`).join('\n')}
 		<th></th>
@@ -139,6 +140,7 @@ function print(videos) {
 		<tbody>
 		${sorted.map((video, index) => `
 			<tr style="padding: 1em;" id="row_${index}">
+			<td omclick="window.remove_video(${video.id})">x</td>
 			<td style="color: hsla(0, 0%, 6.7%, .6);">${index + 1}</td>
 			${o.map(s => `<td>${values[s](video)}</td>`).join('\n')}
 			<td><img src="${video.snippet.thumbnails.default.url}" onclick="window.play_index(${index})"></td>
@@ -155,6 +157,8 @@ function print(videos) {
 			<div id="player"></div>
 			<button onclick="window.play_prev()">PREV</button>
 			<button onclick="window.play_next()">NEXT</button>
+			<button onclick="window.remove_current()">REMOVE</button>
+			<input type="text" placeholder="playlist" value="WL" id="playlist-id"/>
 			<script></script>
 			<div id="videos_list_div_malkiz" style="overflow-y: scroll; height:800px;">
 			${table}
@@ -203,8 +207,7 @@ function player() {
 		console.log('player state changed:', event.data)
 		switch (event.data) {
 			case YT.PlayerState.ENDED:
-				remove_video(window.videos_for_print[curr_video_index].id)
-				play_next()
+				remove_current()
 				break;
 			case YT.PlayerState.UNSTARTED:
 				player.playVideo()
@@ -228,10 +231,28 @@ function player() {
 		const topPos = row.offsetTop;
 		document.getElementById('videos_list_div_malkiz').scrollTop = topPos;
 	}
+	window.remove_current = function remove_current() {
+		const success = remove_video(window.videos_for_print[curr_video_index].id)
+		if (success) play_index(curr_video_index);
+		else play_next()
+	}
 }
 
 function remove_video(id) {
-	const data = {"context":{"client":{"hl":"en","gl":"IL","visitorData":"","userAgent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:78.0) Gecko/20100101 Firefox/78.0,gzip(gfe)","clientName":"WEB","clientVersion":"2.20200724.05.01","osName":"Windows","osVersion":"10.0","browserName":"Firefox","browserVersion":"78.0","screenWidthPoints":863,"screenHeightPoints":722,"screenPixelDensity":1,"utcOffsetMinutes":180,"userInterfaceTheme":"USER_INTERFACE_THEME_DARK"},"request":{"sessionId":"0","internalExperimentFlags":[],"consistencyTokenJars":[]},"user":{},"clientScreenNonce":"","clickTracking":{"clickTrackingParams":""}},"actions":[{"action":"ACTION_REMOVE_VIDEO_BY_VIDEO_ID","removedVideoId":id}],"playlistId":"WL"};
+	const len = window.videos_for_print.length;
+	window.videos_for_print = window.videos_for_print.filter(v => v.id != id);
+	print(window.videos_for_print);
+	remove_video_from_playlist(id);
+	return window.videos_for_print.length != len;
+}
+
+function remove_video_from_playlist(id) {
+	const playlist = document.getElementById('playlist-id').value;
+	if (!playlist) {
+		console.log('enter a playlist ID in order to automatically remove videos');
+		return;
+	}
+	const data = {"context":{"client":{"hl":"en","gl":"IL","visitorData":"","userAgent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:78.0) Gecko/20100101 Firefox/78.0,gzip(gfe)","clientName":"WEB","clientVersion":"2.20200724.05.01","osName":"Windows","osVersion":"10.0","browserName":"Firefox","browserVersion":"78.0","screenWidthPoints":863,"screenHeightPoints":722,"screenPixelDensity":1,"utcOffsetMinutes":180,"userInterfaceTheme":"USER_INTERFACE_THEME_DARK"},"request":{"sessionId":"0","internalExperimentFlags":[],"consistencyTokenJars":[]},"user":{},"clientScreenNonce":"","clickTracking":{"clickTrackingParams":""}},"actions":[{"action":"ACTION_REMOVE_VIDEO_BY_VIDEO_ID","removedVideoId":id}],"playlistId":playlist};
 	const url = 'https://www.youtube.com/youtubei/v1/browse/edit_playlist?key=' + ytcfg.get('INNERTUBE_API_KEY')
 	fetch(url, {
 		method : "POST",
