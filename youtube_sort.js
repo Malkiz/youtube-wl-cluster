@@ -27,6 +27,7 @@ async function youtube_sort_malkiz(opts) {
 	console.log('mapping category names');
 	data.forEach(d => {
 		d.index = ids_arr.findIndex(id => id == d.id);
+		d.duration = d.contentDetails.duration.replace(/[^\d]+/g, ':').replace(/^:|:$/g, '')
 		const category = cats.find(c => c.id == d.snippet.categoryId);
 		d.category = category && category.snippet.title;
 	});
@@ -138,6 +139,7 @@ function print(videos, play_first = true) {
 		<th></th>
 		<th onclick="resort(window.videos_for_print)" style="cursor: pointer; border-bottom: 1px solid;">#</th>
 		${o.map(s => `<th>${s}</th>`).join('\n')}
+		<th>duration</th>
 		<th></th>
 		<th>Video</th>
 		</tr>
@@ -148,6 +150,7 @@ function print(videos, play_first = true) {
 			<td onclick="window.remove_video('${video.id}')" style="cursor: pointer; border-bottom: 1px solid;">x</td>
 			<td style="color: hsla(0, 0%, 6.7%, .6);">${index + 1}</td>
 			${o.map(s => `<td>${values[s](video)}</td>`).join('\n')}
+			<td>${video.duration}</td>
 			<td><img src="${video.snippet.thumbnails.default.url}" onclick="window.play_index(${index})"></td>
 			<td>${youtubeLink(video.id, video.snippet.localized.title)}</a></td>
 			</tr>
