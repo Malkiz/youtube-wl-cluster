@@ -16,7 +16,7 @@ function delay(ms) {
 let options;
 async function youtube_sort_malkiz(opts) {
 	options = opts;
-	await load_deps()
+	await load_deps();
 	[...document.getElementsByTagName('ytd-button-renderer')].forEach(e => e.parentNode.removeChild(e));
 	const ids_arr = [...document.querySelectorAll("a[href^='/watch']")].map(e => e.href.match(/v=([^&]*)/)[1]);
 	const ids = [...new Set(ids_arr)]
