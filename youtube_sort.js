@@ -170,6 +170,8 @@ function youtubeLink(videoId, children) {
 	return `<a href="/watch?v=${videoId}" target="_blank">${children}</a>`;
 }
 
+let curr_video_index = 0;
+
 function player() {
 	var tag = document.createElement('script');
 
@@ -189,19 +191,30 @@ function player() {
 			}
 		});
 	}
-	window.onPlayerReady = function onPlayerReady(event) {
+	function onPlayerReady(event) {
 		event.target.playVideo();
 	}
-	var done = false;
-	window.onPlayerStateChange = function onPlayerStateChange(event) {
+	function onPlayerStateChange(event) {
 		console.log('player state changed:', event.data)
-		if (event.data == YT.PlayerState.PLAYING && !done) {
-			setTimeout(stopVideo, 6000);
-			done = true;
+		switch (event.data) {
+			case YT.PlayerState.ENDED:
+				play_next()
+				break;
+			case YT.PlayerState.UNSTARTED:
+			case YT.PlayerState.CUED:
+				player.playVideo()
+				break;
 		}
 	}
-	window.stopVideo = function stopVideo() {
+	function stopVideo() {
 		console.log('stopping video')
 		player.stopVideo();
+	}
+	function play_next() {
+		play_index(curr_video_index + 1)
+	}
+	window.play_index = function play_index(index) {
+		curr_video_index = index;
+		player.loadVideoById(window.videos_for_print[curr_video_index].id, 0)
 	}
 }
