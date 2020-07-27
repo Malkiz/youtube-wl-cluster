@@ -229,7 +229,7 @@ function player() {
 }
 
 function remove_video(id) {
-	const data = {"actions":[{"action":"ACTION_REMOVE_VIDEO_BY_VIDEO_ID","removedVideoId":id}],"playlistId":"WL"};
+	const data = {"context":{"client":{"hl":"en","gl":"IL","visitorData":"","userAgent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:78.0) Gecko/20100101 Firefox/78.0,gzip(gfe)","clientName":"WEB","clientVersion":"2.20200724.05.01","osName":"Windows","osVersion":"10.0","browserName":"Firefox","browserVersion":"78.0","screenWidthPoints":863,"screenHeightPoints":722,"screenPixelDensity":1,"utcOffsetMinutes":180,"userInterfaceTheme":"USER_INTERFACE_THEME_DARK"},"request":{"sessionId":"0","internalExperimentFlags":[],"consistencyTokenJars":[]},"user":{},"clientScreenNonce":"","clickTracking":{"clickTrackingParams":""}},"actions":[{"action":"ACTION_REMOVE_VIDEO_BY_VIDEO_ID","removedVideoId":id}],"playlistId":"WL"};
 	const url = 'https://www.youtube.com/youtubei/v1/browse/edit_playlist?key=' + ytcfg.get('INNERTUBE_API_KEY')
 	fetch(url, {
 		method : "POST",
