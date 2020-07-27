@@ -108,7 +108,7 @@ function execute(ids = []) {
 			function(err) { console.error("Execute error", err); })
 }
 
-function resort(videos) {
+window.resort = function resort(videos) {
 	order_index = (order_index + 1) % orders.length;
 	print(videos)
 }
@@ -121,7 +121,7 @@ function print(videos) {
 		<table style="color: hsl(0, 0%, 6.7%); font-family: Roboto, Arial, sans-serif; border-spacing: 1em;">
 		<thead>
 		<tr>
-		<th onclick="resort(window.videos_for_print)">#</th>
+		<th onclick="resort(window.videos_for_print)" style="cursor: pointer; border-bottom: 1px solid;">#</th>
 		<th>category</th>
 		<th>date</th>
 		<th>channel</th>
