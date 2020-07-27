@@ -17,7 +17,7 @@ let options;
 async function youtube_sort_malkiz(opts) {
 	options = opts;
 	await load_deps()
-	const ids_arr = [...document.querySelectorAll("a[href^='/watch']")].map(e => e.href.match(/v=    ([^&]*)/)[1]);
+	const ids_arr = [...document.querySelectorAll("a[href^='/watch']")].map(e => e.href.match(/v=([^&]*)/)[1]);
 	const ids = [...new Set(ids_arr)]
 	console.log(`Found ${ids.length} video ids`);
 	const data = await get_videos_data(ids);
