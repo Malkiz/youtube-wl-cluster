@@ -223,6 +223,7 @@ function player() {
 		curr_video_index = index;
 		player.loadVideoById(window.videos_for_print[curr_video_index].id, 0)
 		const row = document.getElementById(`row_${index}`)
-		row.scrollIntoView()
+		const topPos = row.offsetTop;
+		document.getElementById('videos_list_div_malkiz').scrollTop = topPos;
 	}
 }
