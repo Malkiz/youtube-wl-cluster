@@ -140,7 +140,7 @@ function print(videos, play_first = true) {
 		<tbody>
 		${sorted.map((video, index) => `
 			<tr style="padding: 1em;" id="row_${index}">
-			<td onclick="window.remove_video('${video.id}')">x</td>
+			<td onclick="window.remove_video('${video.id}')" style="cursor: pointer; border-bottom: 1px solid;">x</td>
 			<td style="color: hsla(0, 0%, 6.7%, .6);">${index + 1}</td>
 			${o.map(s => `<td>${values[s](video)}</td>`).join('\n')}
 			<td><img src="${video.snippet.thumbnails.default.url}" onclick="window.play_index(${index})"></td>
@@ -238,7 +238,7 @@ function player() {
 	}
 }
 
-function remove_video(id) {
+window.remove_video = function remove_video(id) {
 	const len = window.videos_for_print.length;
 	window.videos_for_print = window.videos_for_print.filter(v => v.id != id);
 	print(window.videos_for_print, false);
