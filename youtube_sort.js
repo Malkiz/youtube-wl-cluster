@@ -152,7 +152,7 @@ function print(videos) {
 		const html = `
 			<div id="player"></div>
 			<script></script>
-			<div id="videos_list_div_malkiz" style="overflow-y: scroll; height:1000px;">
+			<div id="videos_list_div_malkiz" style="overflow-y: scroll; height:800px;">
 			${table}
 			</div>
 			`;
@@ -194,12 +194,14 @@ function player() {
 	}
 	var done = false;
 	window.onPlayerStateChange = function onPlayerStateChange(event) {
+		console.log('player state changed:', event.data)
 		if (event.data == YT.PlayerState.PLAYING && !done) {
 			setTimeout(stopVideo, 6000);
 			done = true;
 		}
 	}
 	window.stopVideo = function stopVideo() {
+		console.log('stopping video')
 		player.stopVideo();
 	}
 }
