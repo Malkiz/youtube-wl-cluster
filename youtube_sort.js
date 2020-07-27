@@ -193,7 +193,7 @@ function player() {
 		player = new YT.Player('player', {
 			height: '390',
 			width: '640',
-			videoId: window.videos_for_print[0].id,
+			videoId: window.videos_for_print[curr_video_index].id,
 			events: {
 				'onReady': onPlayerReady,
 				'onStateChange': onPlayerStateChange
