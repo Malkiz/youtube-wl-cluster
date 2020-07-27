@@ -201,10 +201,10 @@ function player() {
 		console.log('player state changed:', event.data)
 		switch (event.data) {
 			case YT.PlayerState.ENDED:
+				remove_video(window.videos_for_print[curr_video_index].id)
 				play_next()
 				break;
 			case YT.PlayerState.UNSTARTED:
-			//case YT.PlayerState.CUED:
 				player.playVideo()
 				break;
 		}
@@ -226,4 +226,16 @@ function player() {
 		const topPos = row.offsetTop;
 		document.getElementById('videos_list_div_malkiz').scrollTop = topPos;
 	}
+}
+
+function remove_video(id) {
+	const data = {"actions":[{"action":"ACTION_REMOVE_VIDEO_BY_VIDEO_ID","removedVideoId":id}],"playlistId":"WL"};
+	const url = 'https://www.youtube.com/youtubei/v1/browse/edit_playlist?key=' + ytcfg.get('INNERTUBE_API_KEY')
+	fetch(url, {
+		method : "POST",
+		body: JSON.stringify(data)
+	}).then(response => response.text())
+		.then(
+			html => console.log(html)
+		);
 }
