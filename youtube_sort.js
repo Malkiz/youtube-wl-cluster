@@ -140,7 +140,7 @@ function print(videos) {
 		<tbody>
 		${sorted.map((video, index) => `
 			<tr style="padding: 1em;" id="row_${index}">
-			<td onclick="window.remove_video(${video.id})">x</td>
+			<td onclick="window.remove_video('${video.id}')">x</td>
 			<td style="color: hsla(0, 0%, 6.7%, .6);">${index + 1}</td>
 			${o.map(s => `<td>${values[s](video)}</td>`).join('\n')}
 			<td><img src="${video.snippet.thumbnails.default.url}" onclick="window.play_index(${index})"></td>
