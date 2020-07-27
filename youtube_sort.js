@@ -25,11 +25,10 @@ async function youtube_sort_malkiz(options) {
 		const category = cats.find(c => c.id == d.snippet.categoryId);
 		d.category = category && category.snippet.title;
 	});
-	console.log('sorting');
-	const sorted = data.sort((a, b) => vid_sort(a, b));
+	window.videos_for_print = data;
 	console.log('printing results');
-	console.log(sorted);
-	print(sorted);
+	console.log(data);
+	print(data);
 }
 
 function categories() {
@@ -45,12 +44,21 @@ function categories() {
 			function(err) { console.error("Execute error", err); });
 }
 
+const sorters = {
+	category: (a, b) => str_sort(a.category, b.category),
+	published: (a, b) => str_sort(new Date(a.snippet.publishedAt), new Date(b.snippet.publishedAt)),
+	channel: (a, b) => str_sort(a.snippet.channelTitle, b.snippet.channelTitle)
+}
+const orders = [['category', 'published', 'channel'], ['category', 'channel', 'published']]
+let order_index = 0;
+
 function vid_sort(a, b) {
-	let res = str_sort(a.category, b.category);
-	if (res) return res;
-	res = str_sort(new Date(a.snippet.publishedAt), new Date(b.snippet.publishedAt))
-	if (res) return res;
-	return str_sort(a.snippet.channelTitle, b.snippet.channelTitle)
+	const o = orders[order_index];
+	for (i = 0; i < o.length; i++) {
+		let res = sorters[o[i]](a,b)
+		if (res) return res
+	}
+	return res
 }
 
 function str_sort(a, b) {
@@ -100,14 +108,20 @@ function execute(ids = []) {
 			function(err) { console.error("Execute error", err); })
 }
 
+function resort(videos) {
+	order_index = (order_index + 1) % orders.length;
+	print(videos)
+}
+
 function print(videos) {
-	const sorted = Array.from(videos)
+	console.log('sorting');
+	const sorted = Array.from(videos).sort((a, b) => vid_sort(a, b));
 
 	const html = `
 		<table style="color: hsl(0, 0%, 6.7%); font-family: Roboto, Arial, sans-serif; border-spacing: 1em;">
 		<thead>
 		<tr>
-		<th></th>
+		<th onclick="resort(window.videos_for_print)">#</th>
 		<th>category</th>
 		<th>date</th>
 		<th>channel</th>
