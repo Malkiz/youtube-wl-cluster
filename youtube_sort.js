@@ -59,8 +59,9 @@ let order_index = 0;
 
 function vid_sort(a, b) {
 	const o = orders[order_index];
+	let res
 	for (i = 0; i < o.length; i++) {
-		let res = sorters[o[i]](a,b)
+		res = sorters[o[i]](a,b)
 		if (res) return res
 	}
 	return res
