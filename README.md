@@ -79,7 +79,7 @@ This is a javascript tool that is meant to "control" YouTube playlists in a more
 
 ### api_key
 You need to go into Google Console, create an app, and add the `YouTube Data API v3`. Then create an API key for that API, and copy it here.
-- Why didn;t I provide a key? Because Google has quotas for using their API's and I want to use the free tier. (I developed this as a fun side project, not a commercial tool).
+- Why didn't I provide a key? Because Google has quotas for using their API's and I want to use the free tier. (I developed this as a fun side project, not a commercial tool).
 ### authorization
 - Open your browser's Network tab and make sure it's recording activity.
 - Open any video in YouTube and click "like".
