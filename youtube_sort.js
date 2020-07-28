@@ -139,7 +139,7 @@ function print(videos, play_first = true) {
 		<tr>
 		<th></th>
 		<th onclick="resort(window.videos_for_print)" style="cursor: pointer; border-bottom: 1px solid;">#</th>
-		${o.map(s => `<th>${s}</th>`).join('\n')}
+		${Object.keys(values).map(s => `<th>${s}</th>`).join('\n')}
 		<th>duration</th>
 		<th></th>
 		<th>Video</th>
