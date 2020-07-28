@@ -3,7 +3,7 @@ javascript:(function() {
 	.then(res => res.text())
 	.then(script => {
 		eval(script);
-		return youtube_sort_malkiz({client_id: '', api_key: ''})
+		return youtube_sort_malkiz({api_key: '', authorization: ''})
 	})
 	.catch(e => {
 		console.error(e);

@@ -124,6 +124,7 @@ function execute(ids = []) {
 
 window.resort = function resort(videos) {
 	order_index = (order_index + 1) % orders.length;
+	document.getElementById('sort').value = order_index;
 	print(videos)
 }
 
@@ -172,6 +173,9 @@ function print(videos, play_first = true) {
 			<button onclick="window.do_like(window.current_id())">LIKE</button>
 			<button onclick="window.do_dislike(window.current_id())">DISLIKE</button>
 			<button onclick="window.do_unlike(window.current_id())">UNLIKE</button>
+			<select name="sort" id="sort">
+			${orders.map((o,i) => `<option value="${i}">${o.join(',')}</option>`).join('\n')}
+			</select>
 			</div>
 			<script></script>
 			<div id="videos_list_div_malkiz" style="overflow-y: scroll; height:800px;">
@@ -181,6 +185,11 @@ function print(videos, play_first = true) {
 
 		document.write(html);
 		document.close();
+
+		document.querySelector('#sort').addEventListener('change', (event) => {
+			order_index = Number(event.target.value)
+			print(window.videos_for_print)
+		})
 
 		player()
 	} else {
@@ -303,7 +312,7 @@ function like_url(url, id) {
 	const data = {"context":{"client":{"hl":"en","gl":"IL","visitorData":"","userAgent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:78.0) Gecko/20100101 Firefox/78.0,gzip(gfe)","clientName":"WEB","clientVersion":"2.20200724.05.01","osName":"Windows","osVersion":"10.0","browserName":"Firefox","browserVersion":"78.0","screenWidthPoints":874,"screenHeightPoints":722,"screenPixelDensity":1,"utcOffsetMinutes":180,"userInterfaceTheme":"USER_INTERFACE_THEME_DARK"},"request":{"sessionId":"0","internalExperimentFlags":[],"consistencyTokenJars":[{"encryptedTokenJarContents":"","expirationSeconds":"600"}]},"user":{},"clientScreenNonce":"","clickTracking":{"clickTrackingParams":""}},"target":{"videoId":id},"params":""};
 	do_post(url, data)
 }
- function do_post(url, data) {
+function do_post(url, data) {
 	return fetch(url, {
 		method : "POST",
 		body: JSON.stringify(data),
@@ -312,4 +321,4 @@ function like_url(url, id) {
 		.then(
 			json => console.log(json.status)
 		);
- }
+}
