@@ -168,11 +168,17 @@ function print(videos, play_first = true) {
 			<div>
 			<button onclick="window.play_prev()">PREV</button>
 			<button onclick="window.play_next()">NEXT</button>
-			<button onclick="window.remove_current()">REMOVE</button>
-			<input type="text" placeholder="playlist" value="${urlParams.get('list') || ''}" id="playlist-id"/>
 			<button onclick="window.do_like(window.current_id())">LIKE</button>
 			<button onclick="window.do_dislike(window.current_id())">DISLIKE</button>
 			<button onclick="window.do_unlike(window.current_id())">UNLIKE</button>
+			</div>
+			<div>
+			playlist:
+			<input type="text" placeholder="playlist" value="${urlParams.get('list') || ''}" id="playlist-id"/>
+			<button onclick="window.remove_current()">REMOVE</button>
+			</div>
+			<div>
+			sort:
 			<select name="sort" id="sort">
 			${orders.map((o,i) => `<option value="${i}">${o.join(',')}</option>`).join('\n')}
 			</select>
