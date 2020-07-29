@@ -27,7 +27,12 @@ async function youtube_sort_malkiz(opts) {
 	console.log('mapping category names');
 	data.forEach(d => {
 		d.index = ids_arr.findIndex(id => id == d.id);
-		d.duration = d.contentDetails.duration.replace(/[^\d]+/g, ':').replace(/^:|:$/g, '')
+		d.duration = d.contentDetails.duration
+			.replace(/[^\d]+/g, ':')
+			.replace(/^:|:$/g, '')
+			.split(':')
+			.map(s => s.length === 1 ? '0' + s : s)
+			.join(':');
 		const category = cats.find(c => c.id == d.snippet.categoryId);
 		d.category = category && category.snippet.title;
 	});
