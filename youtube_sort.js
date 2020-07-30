@@ -169,7 +169,11 @@ function print(videos, play_first = true) {
 	if (!div) {
 		const urlParams = new URLSearchParams(window.location.search);
 		const html = `
+			<div style="display:flex;">
 			<div id="player"></div>
+			<div><pre id="description">
+			</pre></div>
+			</div>
 			<div>
 			<button onclick="window.play_prev()">PREV</button>
 			<button onclick="window.play_next()">NEXT</button>
@@ -233,6 +237,10 @@ function player() {
 				'onStateChange': onPlayerStateChange
 			}
 		});
+		updateDescription()
+	}
+	function updateDescription() {
+		document.getElementById('description').innerHTML = current_video().snippet.description
 	}
 	function onPlayerReady(event) {
 		event.target.playVideo();
@@ -262,6 +270,7 @@ function player() {
 	window.play_index = function play_index(index) {
 		curr_video_index = index;
 		player.loadVideoById(current_id(), 0)
+		updateDescription()
 		const row = document.getElementById(`row_${index}`)
 		const topPos = row.offsetTop;
 		document.getElementById('videos_list_div_malkiz').scrollTop = topPos;
@@ -283,8 +292,11 @@ function player() {
 	}
 }
 
+function current_video() = {
+	return window.videos_for_print[curr_video_index]
+}
 window.current_id = function current_id() {
-	return window.videos_for_print[curr_video_index].id
+	return current_video().id
 }
 
 window.remove_video = function remove_video(id) {
