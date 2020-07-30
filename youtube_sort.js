@@ -237,10 +237,10 @@ function player() {
 				'onStateChange': onPlayerStateChange
 			}
 		});
-		updateDescription()
+		updateDescription();
 	}
 	function updateDescription() {
-		document.getElementById('description').innerHTML = current_video().snippet.description
+		document.getElementById('description').innerHTML = current_video().snippet.description;
 	}
 	function onPlayerReady(event) {
 		event.target.playVideo();
@@ -269,12 +269,12 @@ function player() {
 	}
 	window.play_index = function play_index(index) {
 		curr_video_index = index;
-		player.loadVideoById(current_id(), 0)
-		updateDescription()
-		const row = document.getElementById(`row_${index}`)
+		player.loadVideoById(current_id(), 0);
+		updateDescription();
+		const row = document.getElementById(`row_${index}`);
 		const topPos = row.offsetTop;
 		document.getElementById('videos_list_div_malkiz').scrollTop = topPos;
-		document.getElementById('player').scrollIntoView()
+		document.getElementById('player').scrollIntoView();
 	}
 	window.remove_current = function remove_current() {
 		const success = remove_video(current_id())
@@ -293,10 +293,10 @@ function player() {
 }
 
 function current_video() = {
-	return window.videos_for_print[curr_video_index]
+	return window.videos_for_print[curr_video_index];
 }
 window.current_id = function current_id() {
-	return current_video().id
+	return current_video().id;
 }
 
 window.remove_video = function remove_video(id) {
