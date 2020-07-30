@@ -171,7 +171,7 @@ function print(videos, play_first = true) {
 		const html = `
 			<div style="display:flex;">
 			<div id="player"></div>
-			<div style="width:500px;"><pre id="description" style="white-space: pre-wrap;">
+			<div style="width:500px;overflow-y: auto;height: 390px;"><pre id="description" style="white-space: pre-wrap;">
 			</pre></div>
 			</div>
 			<div>
