@@ -292,7 +292,7 @@ function player() {
 	}
 }
 
-function current_video() = {
+function current_video() {
 	return window.videos_for_print[curr_video_index];
 }
 window.current_id = function current_id() {
