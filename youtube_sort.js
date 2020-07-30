@@ -340,8 +340,8 @@ function do_post(url, data) {
 		method : "POST",
 		body: JSON.stringify(data),
 		headers: new Headers({Authorization: localStorage.getItem('malkiz_youtube_authorization') || options.authorization})
-	}).then(response => JSON.parse(response.text()))
+	}).then(response => response.text())
 		.then(
-			json => console.log(json.status)
+			json => console.log(json)
 		);
 }
